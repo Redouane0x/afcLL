@@ -1,33 +1,31 @@
-@extends('layouts.app')
+<x-app-layout>
+    <div class="py-12 max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold text-green-800 mb-6">Boutique du club</h1>
 
-@section('content')
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-    <h1 class="text-vert mb-4">Boutique du club </h1>
-
-    <div class="row">
-
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="https://via.placeholder.com/300" class="card-img-top">
-                <div class="card-body">
-                    <h5>Maillot AFC LL</h5>
-                    <p>Prix : 35€</p>
-                    <button class="btn btn-vert">Voir</button>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <img src="https://via.placeholder.com/300" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h5 class="text-xl font-bold text-gray-800 mb-2">Maillot AFCLL</h5>
+                    <p class="text-gray-600 mb-4 font-semibold">Prix : 35€</p>
+                    <button class="bg-green-800 text-white px-4 py-2 rounded hover:bg-green-700 w-full font-bold transition">
+                        Voir
+                    </button>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <img src="https://via.placeholder.com/300" class="card-img-top">
-                <div class="card-body">
-                    <h5>Crampons</h5>
-                    <p>Prix : 60€</p>
-                    <button class="btn btn-vert">Voir</button>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <img src="https://via.placeholder.com/300" class="w-full h-48 object-cover">
+                <div class="p-6">
+                    <h5 class="text-xl font-bold text-gray-800 mb-2">Crampons</h5>
+                    <p class="text-gray-600 mb-4 font-semibold">Prix : 60€</p>
+                    <button class="bg-green-800 text-white px-4 py-2 rounded hover:bg-green-700 w-full font-bold transition">
+                        Voir
+                    </button>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
-
-@endsection
+</x-app-layout>

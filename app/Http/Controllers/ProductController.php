@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    // Fonction qui renvoie tous les produits de la boutique
     public function index()
     {
+        // 1. On va chercher tous les produits dans la base de données
         $products = Product::all();
-        return response()->json($products);
+
+        // 2. On renvoie la vue Blade en lui passant la variable $products
+        return view('pages.boutique', compact('products'));
     }
 }
