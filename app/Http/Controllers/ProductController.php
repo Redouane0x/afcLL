@@ -13,6 +13,6 @@ class ProductController extends Controller
         $products = Product::all();
 
         // 2. On renvoie la vue Blade en lui passant la variable $products
-        return view('pages.boutique', compact('products'));
+        return view('pages.public.boutique', compact('products'));
     }
 }
