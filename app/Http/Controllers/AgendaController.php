@@ -13,7 +13,7 @@ class AgendaController extends Controller
         $matchs = FootMatch::all();
 
         // On les envoie à la vue
-        return view('pages.agenda', compact('matchs'));
+        return view('pages.public.agenda', compact('matchs'));
     }
 
     // Petite fonction pour transformer "25/04/2026" en "2026-04-25" pour le calendrier
