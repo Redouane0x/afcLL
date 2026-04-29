@@ -1,69 +1,219 @@
-<nav x-data="{ open: false }" class="bg-green-800"> <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
+<nav x-data="{ open: false, more: false, admin: false }"
+     class="bg-green-700 shadow-md sticky top-0 z-50">
 
-            <div class="flex items-center">
-                <a href="/" class="flex items-center text-white text-xl font-bold hover:text-green-200">
-                    <img src="/images/logo.png" width="40" class="mr-2 rounded" onerror="this.src='https://via.placeholder.com/40'">
-                    AFCLL
-                </a>
-            </div>
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
 
-            <div class="hidden lg:flex lg:items-center lg:space-x-2">
-                <a href="/" class="text-white hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium">Accueil</a>
-                <a href="/agenda" class="text-white hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium">Agenda</a>
-                <a href="/boutique" class="text-white hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium">Boutique</a>
-                <a href="/club" class="text-white hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium">Club</a>
-                <a href="/actualites" class="text-white hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium">Actualités</a>
-                <a href="/galerie" class="text-white hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium">Galerie</a>
-                <a href="/contact" class="text-white hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
+            {{-- LOGO --}}
+            <a href="/" class="flex items-center gap-2 text-white font-bold text-lg">
+                <img src="/images/logo.png" class="w-9 h-9 rounded"
+                     onerror="this.src='https://via.placeholder.com/40'">
+                AFCLL
+            </a>
 
-                <div class="pl-4 border-l border-green-600 flex items-center space-x-2">
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="text-white font-bold px-3 py-2">Mon Espace</a>
-                        <form method="POST" action="{{ route('logout') }}" class="m-0">
-                            @csrf
-                            <button type="submit" class="text-green-200 hover:text-white text-sm px-2">Déconnexion</button>
-                        </form>
-                    @else
-                        <a href="{{ route('login') }}" class="text-white hover:text-green-200 text-sm font-medium">Connexion</a>
-                        <a href="{{ route('register') }}" class="bg-white text-green-800 hover:bg-gray-100 px-3 py-1 rounded-md text-sm font-bold">Inscription</a>
-                    @endauth
+            {{-- MENU CENTER --}}
+            <div class="hidden lg:flex items-center gap-6">
+
+                <a href="/" class="nav-link">Accueil</a>
+                <a href="/boutique" class="nav-link">Boutique</a>
+                <a href="{{ route('buvette') }}" class="nav-link">Buvette</a>
+
+                {{-- DROPDOWN --}}
+                <div class="relative">
+                    <button @click="more = !more" class="nav-link">
+                        Explorer ▾
+                    </button>
+
+                    <div x-show="more"
+                         @click.outside="more = false"
+                         class="dropdown">
+
+                        <a href="/agenda" class="dropdown-link">Agenda</a>
+                        <a href="/club" class="dropdown-link">Club</a>
+                        <a href="/actualites" class="dropdown-link">Actualités</a>
+                        <a href="/galerie" class="dropdown-link">Galerie</a>
+                        <a href="/contact" class="dropdown-link">Contact</a>
+
+                    </div>
                 </div>
-            </div>
 
-            <div class="flex items-center lg:hidden">
-                <button @click="open = ! open" class="text-white hover:text-green-200 focus:outline-none p-2">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
+                <a href="{{ route('cart') }}" class="nav-link flex items-center gap-1">
+                    Panier
+                    @php $count = count(session('cart', [])); @endphp
+                    @if($count > 0)
+                        <span class="badge">{{ $count }}</span>
+                    @endif
+                </a>
 
-    <div :class="{'block': open, 'hidden': ! open}" class="lg:hidden bg-green-900">
-        <div class="px-2 pt-2 pb-3 space-y-1">
-            <a href="/" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">Accueil</a>
-            <a href="/agenda" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">Agenda</a>
-            <a href="/boutique" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">Boutique</a>
-            <a href="/club" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">Club</a>
-            <a href="/actualites" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">Actualités</a>
-            <a href="/galerie" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">Galerie</a>
-            <a href="/contact" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">Contact</a>
-
-            <div class="border-t border-green-700 pt-2 mt-2">
                 @auth
-                    <a href="{{ route('dashboard') }}" class="block text-white font-bold px-3 py-2">Mon Espace</a>
-                    <form method="POST" action="{{ route('logout') }}" class="m-0">
-                        @csrf
-                        <button type="submit" class="block w-full text-left text-green-300 hover:bg-green-700 px-3 py-2 rounded-md text-base">Déconnexion</button>
-                    </form>
-                @else
-                    <a href="{{ route('login') }}" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">Connexion</a>
-                    <a href="{{ route('register') }}" class="block text-white hover:bg-green-700 px-3 py-2 rounded-md text-base font-medium">Inscription</a>
+                    <a href="{{ route('orders.index') }}" class="nav-link">
+                        Commandes
+                    </a>
                 @endauth
+
             </div>
+
+            {{-- RIGHT SIDE --}}
+            <div class="hidden lg:flex items-center gap-3">
+
+                @auth
+
+                    {{-- ADMIN --}}
+                    @if(auth()->user()->role === 'admin')
+                        <div class="relative">
+                            <button @click="admin = !admin" class="admin-btn">
+                                Admin ▾
+                            </button>
+
+                            <div x-show="admin"
+                                 @click.outside="admin = false"
+                                 class="dropdown right-0">
+
+                                <a href="{{ route('admin.products') }}" class="dropdown-link">
+                                    Produits
+                                </a>
+
+                                <a href="{{ route('admin.buvette') }}" class="dropdown-link">
+                                    Buvette
+                                </a>
+
+                                <a href="{{ route('admin.orders') }}" class="dropdown-link">
+                                    Commandes
+                                </a>
+
+                            </div>
+                        </div>
+                    @endif
+
+                    <a href="{{ route('dashboard') }}" class="nav-link">
+                        Mon espace
+                    </a>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button class="logout-btn">
+                            Déconnexion
+                        </button>
+                    </form>
+
+                @else
+
+                    <a href="{{ route('login') }}" class="nav-link">
+                        Connexion
+                    </a>
+
+                    <a href="{{ route('register') }}" class="register-btn">
+                        Inscription
+                    </a>
+
+                @endauth
+
+            </div>
+
+            {{-- MOBILE --}}
+            <button @click="open = !open" class="lg:hidden text-white text-xl">
+                ☰
+            </button>
+
         </div>
     </div>
+
+    {{-- MOBILE MENU --}}
+    <div x-show="open" class="lg:hidden bg-green-800 px-4 py-4 space-y-2">
+
+        <a href="/" class="mobile-link">Accueil</a>
+        <a href="/boutique" class="mobile-link">Boutique</a>
+        <a href="{{ route('buvette') }}" class="mobile-link">Buvette</a>
+
+        <a href="/agenda" class="mobile-link">Agenda</a>
+        <a href="/club" class="mobile-link">Club</a>
+        <a href="/actualites" class="mobile-link">Actualités</a>
+        <a href="/galerie" class="mobile-link">Galerie</a>
+        <a href="/contact" class="mobile-link">Contact</a>
+
+        <a href="{{ route('cart') }}" class="mobile-link">
+            Panier ({{ count(session('cart', [])) }})
+        </a>
+
+        @auth
+            <a href="{{ route('orders.index') }}" class="mobile-link">
+                Mes commandes
+            </a>
+        @endauth
+
+    </div>
+
 </nav>
+
+<style>
+    .nav-link {
+        color: white;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+    .nav-link:hover {
+        background-color: #15803d;
+    }
+
+    .dropdown {
+        position: absolute;
+        top: 45px;
+        left: 0;
+        width: 200px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        padding: 8px 0;
+        z-index: 999;
+    }
+
+    .dropdown-link {
+        display: block;
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    .dropdown-link:hover {
+        background: #f3f4f6;
+    }
+
+    .badge {
+        background: red;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 999px;
+    }
+
+    .admin-btn {
+        background: white;
+        color: #15803d;
+        padding: 5px 10px;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+
+    .register-btn {
+        background: white;
+        color: #15803d;
+        padding: 5px 10px;
+        border-radius: 6px;
+    }
+
+    .logout-btn {
+        color: rgba(255,255,255,0.7);
+    }
+    .logout-btn:hover {
+        color: white;
+    }
+
+    .mobile-link {
+        display: block;
+        color: white;
+        padding: 8px;
+        border-radius: 6px;
+    }
+    .mobile-link:hover {
+        background: #15803d;
+    }
+</style>

@@ -11,16 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('buvette_products', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-
-            $table->decimal('total_price', 8, 2)->default(0);
-
-            $table->enum('status', ['en_preparation', 'payee', 'annulee'])
-                ->default('en_preparation');
-
+            $table->string('name');
+            $table->decimal('price', 8, 2);
+            $table->integer('stock')->default(0);
+            $table->string('image')->nullable();
             $table->timestamps();
         });
     }
@@ -30,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('buvette_products');
     }
 };

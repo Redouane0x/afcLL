@@ -7,38 +7,152 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    // Passer une commande
-    public function store(Request $request)
+    /*
+    |--------------------------------------------------------------------------
+    | 🛒 PANIER (SESSION)
+    |--------------------------------------------------------------------------
+    */
+
+    // Ajouter au panier
+    public function add(Request $request)
     {
-        // On s'attend à recevoir le prix total ET un tableau de produits (avec leur id et quantité)
-        $validated = $request->validate([
-            'total_price' => 'required|numeric',
-            'products' => 'required|array', // ex: [ ["id" => 1, "quantity" => 2], ["id" => 2, "quantity" => 1] ]
-        ]);
+        $cart = session()->get('cart', []);
 
-        // 1. On crée la commande principale
-        $order = Order::create([
-            'user_id' => $request->user()->id,
-            'total_price' => $validated['total_price'],
-            'status' => 'en_preparation',
-        ]);
+        $cart[] = [
+            'product_id' => $request->product_id,
+            'name' => $request->name,
+            'price' => $request->price,
+            'size' => $request->size,
+            'custom_name' => $request->custom_name,
+            'custom_number' => $request->custom_number,
+            'quantity' => 1,
+        ];
 
-        // 2. On attache chaque produit à cette commande avec sa quantité
-        foreach ($request->products as $product) {
-            $order->products()->attach($product['id'], ['quantity' => $product['quantity']]);
-        }
+        session()->put('cart', $cart);
 
-        // On renvoie la commande complète avec ses produits inclus !
-        return response()->json([
-            'message' => 'Commande validée avec succès !',
-            'order' => $order->load('products')
-        ], 201);
+        return redirect()->route('cart')->with('success', 'Produit ajouté au panier');
     }
 
-    // Voir mes commandes
+    // Afficher le panier
+    public function cart()
+    {
+        $cart = session()->get('cart', []);
+        return view('pages.shop.cart', compact('cart'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 💳 CHECKOUT (PAGE PAIEMENT)
+    |--------------------------------------------------------------------------
+    */
+
+    public function checkout()
+    {
+        $cart = session()->get('cart', []);
+
+        if (empty($cart)) {
+            return redirect()->route('cart');
+        }
+
+        return view('pages.shop.checkout', compact('cart'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 💰 TRAITEMENT PAIEMENT
+    |--------------------------------------------------------------------------
+    */
+
+    public function processPayment(Request $request)
+    {
+        $cart = session()->get('cart', []);
+
+        if (empty($cart)) {
+            return redirect()->route('cart');
+        }
+
+        // 💰 total
+        $total = collect($cart)->sum('price');
+
+        // 📦 création commande
+        $order = Order::create([
+            'user_id' => auth()->id(),
+            'total_price' => $total,
+            'status' => 'payee',
+        ]);
+
+        // 🔗 attacher produits
+        foreach ($cart as $item) {
+            $order->products()->attach($item['product_id'], [
+                'quantity' => $item['quantity'],
+                'custom_name' => $item['custom_name'],
+                'custom_number' => $item['custom_number'],
+            ]);
+        }
+
+        // 🧹 vider panier
+        session()->forget('cart');
+
+        return redirect()->route('orders.index')->with('success', 'Paiement réussi');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 📦 MES COMMANDES
+    |--------------------------------------------------------------------------
+    */
+
     public function myOrders(Request $request)
     {
-        $orders = Order::where('user_id', $request->user()->id)->get();
-        return response()->json($orders);
+        $orders = Order::where('user_id', $request->user()->id)
+            ->with('products')
+            ->latest()
+            ->get();
+
+        return view('pages.shop.orders', compact('orders'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ❌ SUPPRIMER ITEM PANIER
+    |--------------------------------------------------------------------------
+    */
+
+    public function remove($index)
+    {
+        $cart = session()->get('cart', []);
+
+        if (isset($cart[$index])) {
+            unset($cart[$index]);
+            session()->put('cart', array_values($cart));
+        }
+
+        return back();
+    }
+    // 📦 LISTE ADMIN
+    public function adminOrders()
+    {
+        $orders = Order::with('products', 'user')->latest()->get();
+        return view('pages.admin.orders.index', compact('orders'));
+    }
+
+// 🔄 UPDATE STATUS
+    public function updateStatus(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+
+        $order->update([
+            'status' => $request->status
+        ]);
+
+        return back()->with('success', 'Statut mis à jour');
+    }
+    public function show($id)
+    {
+        $order = Order::with('products')
+            ->where('user_id', auth()->id())
+            ->findOrFail($id);
+
+        return view('pages.shop.order-show', compact('order'));
     }
 }
