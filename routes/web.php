@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\AgendaController;
 
 Route::view('/', 'pages.home');
 Route::view('/agenda', 'pages.agenda');
@@ -13,7 +14,7 @@ Route::view('/galerie', 'pages.galerie');
 Route::view('/contact', 'pages.contact');
 
 Route::get('/boutique', [ProductController::class, 'index'])->name('boutique');
-
+Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda');
 Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::view('/dashboard', 'dashboard')->name('dashboard');
