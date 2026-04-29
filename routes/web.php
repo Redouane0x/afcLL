@@ -75,7 +75,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Gestion des produits
     Route::resource('produits', ProductController::class)->except(['show']);
     // Note: resource remplace index, create, store, edit, update, destroy d'un coup !
-
+    Route::resource('produits', ProductController::class)
+        ->names(['index' => 'products'])
+        ->except(['show']);
     // Gestion des commandes
     Route::get('/commandes', [OrderController::class, 'adminOrders'])->name('orders');
     Route::post('/commandes/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
