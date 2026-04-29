@@ -6,26 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('order_product', function (Blueprint $table) {
             $table->id();
-            // Le lien vers la commande
-            $table->foreignId('order_id')->constrained()->onDelete('cascade');
-            // Le lien vers le produit
-            $table->foreignId('product_id')->constrained()->onDelete('cascade');
-            // La quantité achetée pour ce produit précis
+
+            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+
             $table->integer('quantity')->default(1);
+
+            // 🔥 Flocage
+            $table->string('custom_name', 100)->nullable();
+            $table->unsignedInteger('custom_number')->nullable();
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('order_product');

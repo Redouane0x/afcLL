@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,11 +14,24 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Nom du produit (ex: Maillot Domicile)
+
+            // Infos produit
+            $table->string('name'); // Nom (ex: Maillot domicile)
             $table->text('description')->nullable(); // Description
-            $table->decimal('price', 8, 2); // Prix avec 2 décimales (ex: 25.50)
-            $table->integer('stock_quantity')->default(0); // Le stock !
-            $table->string('image_url')->nullable(); // Lien de la photo
+
+            $table->decimal('price', 8, 2); // Prix
+
+            $table->integer('stock_quantity')->default(0); // Stock
+
+            $table->string('image_url')->nullable(); // Image
+
+            // 🔥 IMPORTANT POUR TON PROJET
+            $table->enum('type', ['tshirt', 'short', 'manteau', 'autre'])
+                ->default('autre');
+
+            // Permet le flocage (nom + numéro)
+            $table->boolean('customizable')->default(false);
+
             $table->timestamps();
         });
     }
