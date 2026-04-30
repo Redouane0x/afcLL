@@ -18,11 +18,6 @@
 /public/storage
 /storage/*.key
 /storage/pail
-/vendor
-!vendor/laravel/dusk/bin/
-!vendor/laravel/dusk/bin/chromedriver
-!vendor/laravel/dusk/bin/chromedriver-mac-arm
-!vendor/laravel/dusk/bin/chromedriver.exe
 _ide_helper.php
 Homestead.json
 Homestead.yaml
