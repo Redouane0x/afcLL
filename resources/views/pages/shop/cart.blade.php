@@ -15,24 +15,19 @@
 
                     <div>
                         <h3 class="font-bold text-lg">{{ $item['name'] }}</h3>
-                        <p class="text-gray-600">{{ $item['price'] }} €</p>
 
-                        @if($item['size'])
-                            <p class="text-sm text-gray-500">Taille : {{ $item['size'] }}</p>
-                        @endif
+                        <p class="text-gray-600">
+                            {{ $item['price'] }} € x {{ $item['quantity'] }}
+                        </p>
 
-                        @if($item['custom_name'])
-                            <p class="text-sm text-blue-600">
-                                Flocage : {{ $item['custom_name'] }} #{{ $item['custom_number'] }}
-                            </p>
-                        @endif
+                        <p class="font-bold">
+                            Total : {{ $item['price'] * $item['quantity'] }} €
+                        </p>
                     </div>
 
                     <form method="POST" action="{{ route('cart.remove', $index) }}">
                         @csrf
-                        <button class="text-red-500 hover:underline">
-                            Supprimer
-                        </button>
+                        <button class="text-red-500">Supprimer</button>
                     </form>
 
                 </div>
@@ -45,22 +40,26 @@
 
             @endforelse
 
-            {{-- TOTAL --}}
             @if(count($cart) > 0)
+
+                @php
+                    $total = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+                @endphp
+
                 <div class="bg-white p-5 rounded-xl shadow text-right">
 
                     <p class="text-xl font-bold">
-                        Total : {{ collect($cart)->sum('price') }} €
+                        Total : {{ $total }} €
                     </p>
 
-                    {{-- ✅ BON BOUTON --}}
                     <form method="GET" action="{{ route('checkout') }}">
-                        <button class="mt-4 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700">
+                        <button class="mt-4 bg-green-600 text-white px-6 py-3 rounded-lg">
                             Passer commande
                         </button>
                     </form>
 
                 </div>
+
             @endif
 
         </div>

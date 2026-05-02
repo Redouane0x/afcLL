@@ -3,20 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | 🛒 PANIER (SESSION)
-    |--------------------------------------------------------------------------
-    */
-
-    // Ajouter au panier
     public function add(Request $request)
     {
+        $product = Product::findOrFail($request->product_id);
+
+        $quantity = max(1, (int)$request->quantity);
+
+        // 🚫 BLOQUER SI STOCK DÉPASSÉ
+        if ($quantity > $product->stock_quantity) {
+            return back()->with('error', 'Stock insuffisant (max: ' . $product->stock_quantity . ')');
+        }
+
         $cart = session()->get('cart', []);
+
+        // 🔥 éviter de dépasser si déjà dans le panier
+        $existingQuantity = collect($cart)
+            ->where('product_id', $product->id)
+            ->sum('quantity');
+
+        if (($existingQuantity + $quantity) > $product->stock_quantity) {
+            return back()->with('error', 'Stock insuffisant total');
+        }
 
         $cart[] = [
             'product_id' => $request->product_id,
@@ -25,7 +37,7 @@ class OrderController extends Controller
             'size' => $request->size,
             'custom_name' => $request->custom_name,
             'custom_number' => $request->custom_number,
-            'quantity' => 1,
+            'quantity' => $quantity,
         ];
 
         session()->put('cart', $cart);
@@ -33,18 +45,11 @@ class OrderController extends Controller
         return redirect()->route('cart')->with('success', 'Produit ajouté au panier');
     }
 
-    // Afficher le panier
     public function cart()
     {
         $cart = session()->get('cart', []);
         return view('pages.shop.cart', compact('cart'));
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | 💳 CHECKOUT (PAGE PAIEMENT)
-    |--------------------------------------------------------------------------
-    */
 
     public function checkout()
     {
@@ -57,12 +62,6 @@ class OrderController extends Controller
         return view('pages.shop.checkout', compact('cart'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 💰 TRAITEMENT PAIEMENT
-    |--------------------------------------------------------------------------
-    */
-
     public function processPayment(Request $request)
     {
         $cart = session()->get('cart', []);
@@ -71,17 +70,14 @@ class OrderController extends Controller
             return redirect()->route('cart');
         }
 
-        // 💰 total
-        $total = collect($cart)->sum('price');
+        $total = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
 
-        // 📦 création commande
         $order = Order::create([
             'user_id' => auth()->id(),
             'total_price' => $total,
             'status' => 'payee',
         ]);
 
-        // 🔗 attacher produits
         foreach ($cart as $item) {
             $order->products()->attach($item['product_id'], [
                 'quantity' => $item['quantity'],
@@ -90,17 +86,10 @@ class OrderController extends Controller
             ]);
         }
 
-        // 🧹 vider panier
         session()->forget('cart');
 
         return redirect()->route('orders.index')->with('success', 'Paiement réussi');
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | 📦 MES COMMANDES
-    |--------------------------------------------------------------------------
-    */
 
     public function myOrders(Request $request)
     {
@@ -111,12 +100,6 @@ class OrderController extends Controller
 
         return view('pages.shop.orders', compact('orders'));
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | ❌ SUPPRIMER ITEM PANIER
-    |--------------------------------------------------------------------------
-    */
 
     public function remove($index)
     {
@@ -129,14 +112,13 @@ class OrderController extends Controller
 
         return back();
     }
-    // 📦 LISTE ADMIN
+
     public function adminOrders()
     {
         $orders = Order::with('products', 'user')->latest()->get();
         return view('pages.admin.orders.index', compact('orders'));
     }
 
-// 🔄 UPDATE STATUS
     public function updateStatus(Request $request, $id)
     {
         $order = Order::findOrFail($id);
@@ -147,6 +129,7 @@ class OrderController extends Controller
 
         return back()->with('success', 'Statut mis à jour');
     }
+
     public function show($id)
     {
         $order = Order::with('products')

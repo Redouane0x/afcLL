@@ -104,7 +104,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth']) // 👉 tu peux ajouter 'admin' ici si tu veux sécuriser
+->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
     Route::resource('produits', ProductController::class)
         ->names(['index' => 'products'])

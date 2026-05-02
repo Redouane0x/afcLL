@@ -8,61 +8,51 @@
 
     <div class="p-8 max-w-7xl mx-auto">
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 
-            @foreach($products as $product)
+            @forelse($products as $product)
 
-                <div class="bg-white rounded-2xl shadow hover:shadow-lg transition duration-300 overflow-hidden">
+                <div class="bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden">
 
                     {{-- IMAGE --}}
-                    @if($product->image_url)
-                        <div class="h-48 bg-gray-100 relative">
+                    <div class="h-48 bg-gray-100">
+                        @if($product->image_url)
+                            <img src="{{ asset('storage/' . $product->image_url) }}"
+                                 class="w-full h-full object-cover">
+                        @else
+                            <div class="flex items-center justify-center h-full text-gray-400">
+                                Pas d'image
+                            </div>
+                        @endif
+                    </div>
 
-                            <img
-                                src="{{ asset('storage/' . $product->image_url) }}"
-                                class="w-full h-full object-cover"
-                            >
-
-                            {{-- BADGE PERSONNALISABLE --}}
-                            @if($product->customizable)
-                                <span class="absolute top-2 left-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
-                                    Personnalisable
-                                </span>
-                            @endif
-
-                        </div>
-                    @endif
-
+                    {{-- CONTENU --}}
                     <div class="p-4">
 
-                        {{-- NOM --}}
-                        <h3 class="font-semibold text-lg text-gray-800 mb-1">
+                        <h3 class="font-semibold text-lg">
                             {{ $product->name }}
                         </h3>
 
-                        {{-- TYPE --}}
-                        <p class="text-sm text-gray-500 mb-2 capitalize">
-                            {{ $product->type }}
-                        </p>
-
-                        {{-- PRIX --}}
-                        <p class="text-green-600 font-bold text-xl mb-3">
+                        <p class="text-green-600 font-bold text-xl">
                             {{ $product->price }} €
                         </p>
 
-                        {{-- BOUTON --}}
-                        <a
-                            href="{{ route('shop.show', $product->id) }}"
-                            class="block text-center bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
-                        >
-                            Voir le produit
+                        <a href="{{ route('shop.show', $product->id) }}"
+                           class="mt-3 block text-center bg-green-600 text-white py-2 rounded hover:bg-green-700">
+                            Voir produit
                         </a>
 
                     </div>
 
                 </div>
 
-            @endforeach
+            @empty
+
+                <div class="col-span-4 text-center text-gray-500 py-10">
+                    Aucun produit disponible
+                </div>
+
+            @endforelse
 
         </div>
 

@@ -1,64 +1,94 @@
 <x-app-layout>
 
     <x-slot name="header">
-        <h2 class="text-3xl font-bold text-gray-800">
-            🥤 Buvette du club
+        <h2 class="text-2xl font-bold text-gray-800">
+            Gestion de la buvette
         </h2>
     </x-slot>
 
     <div class="p-8 max-w-7xl mx-auto">
 
-        {{-- INTRO --}}
-        <div class="mb-8 text-center">
-            <p class="text-gray-600 text-lg">
-                Retrouvez tous les produits disponibles à la buvette lors des matchs ⚽
+        {{-- HEADER ACTION --}}
+        <div class="flex justify-between items-center mb-6">
+            <p class="text-gray-600">
+                Liste de tous les produits de la buvette
             </p>
+
+            <a href="{{ route('admin.buvette.create') }}"
+               class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow">
+                ➕ Ajouter un produit
+            </a>
         </div>
 
-        {{-- GRID --}}
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {{-- GRID PRODUITS --}}
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-            @foreach($products as $product)
+            @forelse($products as $product)
 
                 <div class="bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden">
 
                     {{-- IMAGE --}}
-                    @if($product->image_url)
-                        <img src="{{ asset('storage/' . $product->image_url) }}"
-                             class="w-full h-40 object-cover">
-                    @else
-                        <div class="h-40 bg-gray-100 flex items-center justify-center text-gray-400">
-                            Pas d’image
-                        </div>
-                    @endif
+                    <div class="h-48 bg-gray-100">
+                        @if($product->image_url)
+                            <img
+                                src="{{ asset('storage/' . $product->image_url) }}"
+                                class="w-full h-full object-cover"
+                            >
+                        @else
+                            <div class="flex items-center justify-center h-full text-gray-400">
+                                Pas d'image
+                            </div>
+                        @endif
+                    </div>
 
-                    {{-- INFOS --}}
-                    <div class="p-4 text-center">
+                    {{-- CONTENU --}}
+                    <div class="p-4">
 
-                        <h3 class="font-bold text-lg mb-1">
+                        {{-- NOM --}}
+                        <h3 class="font-semibold text-lg text-gray-800 mb-1">
                             {{ $product->name }}
                         </h3>
 
+                        {{-- PRIX --}}
                         <p class="text-green-600 font-bold text-xl mb-2">
                             {{ $product->price }} €
                         </p>
 
                         {{-- STOCK --}}
-                        @if($product->stock_quantity > 0)
-                            <span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">
-                                Disponible
+                        <p class="text-sm mb-3">
+                            Stock :
+                            <span class="{{ $product->stock_quantity > 0 ? 'text-green-600' : 'text-red-500' }}">
+                                {{ $product->stock_quantity }}
                             </span>
-                        @else
-                            <span class="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full">
-                                Rupture
-                            </span>
-                        @endif
+                        </p>
+
+                        {{-- ACTIONS --}}
+                        <div class="flex justify-between items-center mt-4">
+
+                            <form method="POST" action="{{ route('admin.buvette.delete', $product->id) }}">
+                                @csrf
+                                @method('DELETE')
+
+                                <button
+                                    onclick="return confirm('Supprimer ce produit ?')"
+                                    class="text-red-500 hover:underline text-sm">
+                                    Supprimer
+                                </button>
+                            </form>
+
+                        </div>
 
                     </div>
 
                 </div>
 
-            @endforeach
+            @empty
+
+                <div class="col-span-3 text-center text-gray-500 py-10">
+                    Aucun produit disponible
+                </div>
+
+            @endforelse
 
         </div>
 
