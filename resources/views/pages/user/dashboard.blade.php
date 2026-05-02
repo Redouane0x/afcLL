@@ -7,9 +7,12 @@
     </x-slot>
 
     <div class="p-6">
-        <p>Bienvenue dans ton espace</p>
+        <p class="mb-4">Bienvenue dans ton espace</p>
 
-        <a href="{{ route('shop.index') }}">Aller à la boutique</a>
+        <a href="{{ route('shop.index') }}"
+           class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            Aller à la boutique
+        </a>
     </div>
 
 </x-app-layout>
