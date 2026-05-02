@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\BuvetteController;
+use App\Http\Controllers\GalleryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,133 +15,113 @@ use App\Http\Controllers\BuvetteController;
 */
 
 Route::view('/', 'pages.public.home')->name('home');
-Route::view('/agenda', 'pages.public.agenda')->name('agenda');
+Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda');
+
+Route::get('/boutique', [ProductController::class, 'index'])->name('shop.index');
+
 Route::view('/club', 'pages.public.club')->name('club');
 Route::view('/actualites', 'pages.public.actualites')->name('actualites');
-Route::view('/galerie', 'pages.public.galerie')->name('galerie');
 Route::view('/contact', 'pages.public.contact')->name('contact');
-Route::view('/buvette', 'pages.public.buvette')->name('buvette');
-
 
 /*
 |--------------------------------------------------------------------------
-| 🔁 REDIRECTION LOGIN
-|--------------------------------------------------------------------------
-*/
-
-Route::get('/redirect', function () {
-    $user = auth()->user();
-
-    return $user->role === 'admin'
-        ? redirect()->route('admin.products')
-        : redirect()->route('dashboard');
-
-})->middleware('auth');
-
-
-/*
-|--------------------------------------------------------------------------
-| 🔐 ROUTES UTILISATEUR CONNECTÉ
+| 🔐 ROUTES CONNECTÉES
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    /*
-    | 📊 Dashboard
-    */
+    // Dashboard
     Route::get('/dashboard', function () {
-        return auth()->user()->role === 'admin'
-            ? redirect()->route('admin.products')
-            : view('pages.user.dashboard');
+        return view('pages.user.dashboard');
     })->name('dashboard');
 
+    /*
+    |--------------------------------------------------------------------------
+    | 📸 GALERIE (TOUT ICI 🔥)
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/galerie', [GalleryController::class, 'index'])->name('gallery');
+
+    Route::get('/galerie/create', [GalleryController::class, 'create'])->name('gallery.create');
+    Route::post('/galerie', [GalleryController::class, 'store'])->name('gallery.store');
+
+    Route::get('/galerie/{id}/edit', [GalleryController::class, 'edit'])->name('gallery.edit');
+    Route::put('/galerie/{id}', [GalleryController::class, 'update'])->name('gallery.update');
+
+    Route::post('/galerie/{id}/like', [GalleryController::class, 'like'])->name('gallery.like');
+    Route::post('/galerie/{id}/comment', [GalleryController::class, 'comment'])->name('gallery.comment');
+
+    Route::delete('/galerie/{id}', [GalleryController::class, 'destroy'])->name('gallery.delete');
+    Route::delete('/comment/{id}', [GalleryController::class, 'deleteComment'])->name('comment.delete');
 
     /*
-    | 🛍️ BOUTIQUE
+    |--------------------------------------------------------------------------
+    | 🛒 SHOP
+    |--------------------------------------------------------------------------
     */
-    Route::get('/boutique', [ProductController::class, 'index'])->name('shop.index');
+
     Route::get('/boutique/{id}', [ProductController::class, 'show'])->name('shop.show');
 
-
-    /*
-    | 🛒 PANIER
-    */
     Route::get('/panier', [OrderController::class, 'cart'])->name('cart');
     Route::post('/panier/ajouter', [OrderController::class, 'add'])->name('cart.add');
     Route::post('/panier/remove/{index}', [OrderController::class, 'remove'])->name('cart.remove');
 
-
     /*
-    | 💳 PAIEMENT
+    |--------------------------------------------------------------------------
+    | 💳 COMMANDES
+    |--------------------------------------------------------------------------
     */
+
     Route::get('/paiement', [OrderController::class, 'checkout'])->name('checkout');
     Route::post('/paiement', [OrderController::class, 'processPayment'])->name('checkout.process');
 
-
-    /*
-    | 📦 COMMANDES
-    */
     Route::get('/mes-commandes', [OrderController::class, 'myOrders'])->name('orders.index');
-
+    Route::get('/mes-commandes/{id}', [OrderController::class, 'show'])->name('orders.show');
 
     /*
+    |--------------------------------------------------------------------------
     | 🎫 LICENCES
+    |--------------------------------------------------------------------------
     */
+
     Route::get('/mes-licences', [LicenseController::class, 'myLicenses'])->name('licenses.index');
     Route::post('/licences/demande', [LicenseController::class, 'store'])->name('licenses.store');
-});
 
+    /*
+    |--------------------------------------------------------------------------
+    | 🥤 BUVETTE
+    |--------------------------------------------------------------------------
+    */
 
-/*
-|--------------------------------------------------------------------------
-| 👤 ROUTES JOUEUR
-|--------------------------------------------------------------------------
-*/
-
-Route::middleware(['auth'])->group(function () {
-    Route::view('/planning', 'pages.joueur.planning')->name('joueur.planning');
-    Route::view('/paiement-joueur', 'pages.joueur.paiement')->name('joueur.paiement');
-    Route::get('/mes-commandes/{id}', [OrderController::class, 'show'])
-        ->name('orders.show');
     Route::get('/buvette', [BuvetteController::class, 'index'])->name('buvette');
 });
 
-
 /*
 |--------------------------------------------------------------------------
-| 🛠️ ROUTES ADMIN
+| 🛠️ ADMIN
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
 
-    Route::get('/admin/produits', [ProductController::class, 'adminIndex'])->name('admin.products');
+    Route::resource('produits', ProductController::class)
+        ->names(['index' => 'products'])
+        ->except(['show']);
 
-    Route::get('/admin/produits/create', [ProductController::class, 'create'])->name('admin.products.create');
+    Route::get('/commandes', [OrderController::class, 'adminOrders'])->name('orders');
+    Route::post('/commandes/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
 
-    Route::post('/admin/produits', [ProductController::class, 'store'])->name('admin.products.store');
-
-    Route::get('/admin/produits/{id}/edit', [ProductController::class, 'edit'])->name('admin.products.edit');
-
-    Route::put('/admin/produits/{id}', [ProductController::class, 'update'])->name('admin.products.update');
-
-    Route::delete('/admin/produits/{id}', [ProductController::class, 'destroy'])->name('admin.products.delete');
-    Route::get('/admin/commandes', [OrderController::class, 'adminOrders'])->name('admin.orders');
-    Route::post('/admin/commandes/{id}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.status');
-    Route::get('/admin/buvette', [BuvetteController::class, 'adminIndex'])->name('admin.buvette');
-
-    Route::get('/admin/buvette/create', [BuvetteController::class, 'create'])->name('admin.buvette.create');
-
-    Route::post('/admin/buvette', [BuvetteController::class, 'store'])->name('admin.buvette.store');
-
-    Route::delete('/admin/buvette/{id}', [BuvetteController::class, 'destroy'])->name('admin.buvette.delete');
+    Route::get('/buvette', [BuvetteController::class, 'adminIndex'])->name('buvette');
+    Route::get('/buvette/create', [BuvetteController::class, 'create'])->name('buvette.create');
+    Route::post('/buvette', [BuvetteController::class, 'store'])->name('buvette.store');
+    Route::delete('/buvette/{id}', [BuvetteController::class, 'destroy'])->name('buvette.delete');
 });
-
 
 /*
 |--------------------------------------------------------------------------
-| 🔐 AUTH (Breeze)
+| 🔐 AUTH
 |--------------------------------------------------------------------------
 */
 

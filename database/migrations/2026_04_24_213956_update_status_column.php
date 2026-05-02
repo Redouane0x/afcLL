@@ -11,7 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::table('orders', function (Blueprint $table) {
+            $table->string('status')->default('en_preparation')->change();
+        });
     }
 
     /**
