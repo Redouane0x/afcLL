@@ -73,10 +73,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
 
     // Gestion des produits
-    Route::resource('produits', ProductController::class)->except(['show']);
-    // Note: resource remplace index, create, store, edit, update, destroy d'un coup !
     Route::resource('produits', ProductController::class)
-        ->names(['index' => 'products'])
+        ->names([
+            'index' => 'products',
+            'create' => 'products.create',
+            'store' => 'products.store',
+            'edit' => 'products.edit',
+            'update' => 'products.update',
+            'destroy' => 'products.delete',
+        ])
         ->except(['show']);
     // Gestion des commandes
     Route::get('/commandes', [OrderController::class, 'adminOrders'])->name('orders');
