@@ -9,17 +9,23 @@ class ProductController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | 🛍️ PARTIE UTILISATEUR
+    | 🛍️ PARTIE UTILISATEUR + ADMIN (index intelligent)
     |--------------------------------------------------------------------------
     */
 
     public function index()
     {
-        // ❌ on exclut la buvette
+        // 🔥 on exclut la buvette
         $products = Product::where('type', '!=', 'buvette')
             ->latest()
             ->get();
 
+        // 👉 SI ADMIN → vue admin (avec bouton ajouter)
+        if (auth()->check() && auth()->user()->role === 'admin') {
+            return view('pages.admin.products.index', compact('products'));
+        }
+
+        // 👉 SINON → vue publique
         return view('pages.shop.index', compact('products'));
     }
 
@@ -37,16 +43,6 @@ class ProductController extends Controller
     | 🛠️ PARTIE ADMIN
     |--------------------------------------------------------------------------
     */
-
-    public function adminIndex()
-    {
-        // ❌ on exclut aussi la buvette côté admin produits
-        $products = Product::where('type', '!=', 'buvette')
-            ->latest()
-            ->get();
-
-        return view('pages.admin.products.index', compact('products'));
-    }
 
     public function create()
     {
