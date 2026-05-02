@@ -9,7 +9,7 @@ use App\Http\Controllers\BuvetteController;
 
 /*
 |--------------------------------------------------------------------------
-| 🌐 ROUTES PUBLIQUES (Accessibles à tous)
+| 🌐 ROUTES PUBLIQUES
 |--------------------------------------------------------------------------
 */
 
@@ -24,79 +24,86 @@ Route::view('/contact', 'pages.public.contact')->name('contact');
 
 /*
 |--------------------------------------------------------------------------
-| 🔐 ROUTES AUTHENTIFIÉES (Utilisateurs connectés)
+| 🔐 ROUTES AUTH
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Redirection intelligente après login
     Route::get('/redirect', function () {
         return auth()->user()->role === 'admin'
             ? redirect()->route('admin.products')
             : redirect()->route('dashboard');
     })->name('login.redirect');
 
-    // Dashboard
     Route::get('/dashboard', function () {
         return view('pages.user.dashboard');
     })->name('dashboard');
 
-    /* --- 🛒 BOUTIQUE & PANIER --- */
+    // Boutique
     Route::get('/boutique/{id}', [ProductController::class, 'show'])->name('shop.show');
+
+    // Panier
     Route::get('/panier', [OrderController::class, 'cart'])->name('cart');
     Route::post('/panier/ajouter', [OrderController::class, 'add'])->name('cart.add');
     Route::post('/panier/remove/{index}', [OrderController::class, 'remove'])->name('cart.remove');
 
-    /* --- 💳 PAIEMENT & COMMANDES --- */
+    // Paiement
     Route::get('/paiement', [OrderController::class, 'checkout'])->name('checkout');
     Route::post('/paiement', [OrderController::class, 'processPayment'])->name('checkout.process');
+
+    // Commandes
     Route::get('/mes-commandes', [OrderController::class, 'myOrders'])->name('orders.index');
     Route::get('/mes-commandes/{id}', [OrderController::class, 'show'])->name('orders.show');
 
-    /* --- 🎫 LICENCES --- */
+    // Licences
     Route::get('/mes-licences', [LicenseController::class, 'myLicenses'])->name('licenses.index');
     Route::post('/licences/demande', [LicenseController::class, 'store'])->name('licenses.store');
 
-    /* --- 👤 ESPACE JOUEUR & BUVETTE --- */
+    // Buvette
     Route::get('/buvette', [BuvetteController::class, 'index'])->name('buvette');
+
     Route::view('/planning', 'pages.joueur.planning')->name('joueur.planning');
     Route::view('/paiement-joueur', 'pages.joueur.paiement')->name('joueur.paiement');
 });
 
 /*
 |--------------------------------------------------------------------------
-| 🛠️ ROUTES ADMINISTRATION (Accès restreint)
+| 🛠️ ADMIN
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth']) // 👉 tu peux ajouter 'admin' ici si tu veux sécuriser
+->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
-    // Gestion des produits
-    Route::resource('produits', ProductController::class)
-        ->names([
-            'index' => 'products',
-            'create' => 'products.create',
-            'store' => 'products.store',
-            'edit' => 'products.edit',
-            'update' => 'products.update',
-            'destroy' => 'products.delete',
-        ])
-        ->except(['show']);
-    // Gestion des commandes
-    Route::get('/commandes', [OrderController::class, 'adminOrders'])->name('orders');
-    Route::post('/commandes/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+        // ✅ FIX ICI (products au lieu de produits)
+        Route::resource('products', ProductController::class)
+            ->names([
+                'index' => 'products',
+                'create' => 'products.create',
+                'store' => 'products.store',
+                'edit' => 'products.edit',
+                'update' => 'products.update',
+                'destroy' => 'products.delete',
+            ])
+            ->except(['show']);
 
-    // Gestion de la buvette
-    Route::get('/buvette', [BuvetteController::class, 'adminIndex'])->name('buvette');
-    Route::get('/buvette/create', [BuvetteController::class, 'create'])->name('buvette.create');
-    Route::post('/buvette', [BuvetteController::class, 'store'])->name('buvette.store');
-    Route::delete('/buvette/{id}', [BuvetteController::class, 'destroy'])->name('buvette.delete');
-});
+        // Commandes
+        Route::get('/commandes', [OrderController::class, 'adminOrders'])->name('orders');
+        Route::post('/commandes/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+
+        // Buvette
+        Route::get('/buvette', [BuvetteController::class, 'adminIndex'])->name('buvette');
+        Route::get('/buvette/create', [BuvetteController::class, 'create'])->name('buvette.create');
+        Route::post('/buvette', [BuvetteController::class, 'store'])->name('buvette.store');
+        Route::delete('/buvette/{id}', [BuvetteController::class, 'destroy'])->name('buvette.delete');
+    });
 
 /*
 |--------------------------------------------------------------------------
-| 🔐 AUTH (Breeze)
+| 🔐 AUTH
 |--------------------------------------------------------------------------
 */
 
