@@ -13,4 +13,9 @@ class News extends Model
         'is_published',
         'is_featured'
     ];
+
+    public function comments()
+    {
+        return $this->hasMany(NewsComment::class);
+    }
 }

@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\News;
+use App\Models\NewsComment;
 use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
-    // 📰 PUBLIC
+    // PUBLIC
     public function index()
     {
         $featured = News::where('is_published', true)
@@ -15,7 +16,8 @@ class NewsController extends Controller
             ->latest()
             ->first();
 
-        $news = News::where('is_published', true)
+        $news = News::with('comments.user')
+            ->where('is_published', true)
             ->latest()
             ->get();
 
@@ -84,8 +86,7 @@ class NewsController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('news', 'public');
-            $news->image = $path;
+            $news->image = $request->file('image')->store('news', 'public');
         }
 
         $news->update([
@@ -98,10 +99,26 @@ class NewsController extends Controller
         return redirect()->route('admin.news.index');
     }
 
-    // DELETE
+    // DELETE NEWS
     public function destroy($id)
     {
         News::findOrFail($id)->delete();
+        return back();
+    }
+
+    // COMMENT
+    public function comment(Request $request, $id)
+    {
+        $request->validate([
+            'content' => 'required|string|max:500'
+        ]);
+
+        NewsComment::create([
+            'news_id' => $id,
+            'user_id' => auth()->id(),
+            'content' => $request->content
+        ]);
+
         return back();
     }
 }

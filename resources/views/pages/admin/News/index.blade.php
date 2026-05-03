@@ -7,7 +7,7 @@
     <div class="p-8 max-w-6xl mx-auto space-y-10">
 
         {{-- FEATURED --}}
-        @if($featured)
+        @if(isset($featured) && $featured)
             <div class="bg-white rounded-2xl shadow overflow-hidden">
 
                 @if($featured->image)
@@ -35,7 +35,7 @@
 
             @foreach($news as $item)
 
-                @if(!$featured || $item->id !== $featured->id)
+                @if(!$featured || $item->id !== $featured?->id)
 
                     <div class="bg-white p-5 rounded-xl shadow">
 
@@ -49,8 +49,31 @@
                         </h3>
 
                         <p class="text-sm text-gray-600 mt-2">
-                            {{ Str::limit($item->content, 120) }}
+                            {{ \Illuminate\Support\Str::limit($item->content, 120) }}
                         </p>
+
+                        {{-- COMMENTAIRES --}}
+                        <div class="mt-4 space-y-2">
+                            @foreach($item->comments as $comment)
+                                <p class="text-sm">
+                                    <strong>{{ $comment->user->name }} :</strong>
+                                    {{ $comment->content }}
+                                </p>
+                            @endforeach
+                        </div>
+
+                        {{-- AJOUT COMMENT --}}
+                        @auth
+                            <form method="POST"
+                                  action="{{ route('news.comment', $item->id) }}"
+                                  class="mt-3">
+                                @csrf
+
+                                <input name="content"
+                                       placeholder="Commenter..."
+                                       class="w-full border p-2 rounded">
+                            </form>
+                        @endauth
 
                     </div>
 

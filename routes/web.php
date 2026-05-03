@@ -37,7 +37,6 @@ Route::view('/contact', 'pages.public.contact')->name('contact');
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Dashboard
     Route::get('/dashboard', function () {
         return view('pages.user.dashboard');
     })->name('dashboard');
@@ -49,7 +48,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
 
     Route::get('/galerie', [GalleryController::class, 'index'])->name('gallery');
-
     Route::get('/galerie/create', [GalleryController::class, 'create'])->name('gallery.create');
     Route::post('/galerie', [GalleryController::class, 'store'])->name('gallery.store');
 
@@ -61,6 +59,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::delete('/galerie/{id}', [GalleryController::class, 'destroy'])->name('gallery.delete');
     Route::delete('/comment/{id}', [GalleryController::class, 'deleteComment'])->name('comment.delete');
+
+    /*
+    |--------------------------------------------------------------------------
+    | 💬 COMMENTAIRES ACTUALITÉS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post('/news/{id}/comment', [NewsController::class, 'comment'])
+        ->name('news.comment');
 
     /*
     |--------------------------------------------------------------------------
@@ -123,24 +130,22 @@ Route::middleware(['auth'])
 
         Route::get('/commandes', [OrderController::class, 'adminOrders'])->name('orders');
         Route::post('/commandes/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
-
-        // 📥 EXPORT CSV
         Route::get('/commandes/export', [OrderController::class, 'export'])->name('orders.export');
 
         /*
         |--------------------------------------------------------------------------
-        | 📰 ACTUALITÉS (ADMIN)
+        | 📰 ACTUALITÉS (PROPRE)
         |--------------------------------------------------------------------------
         */
 
-        // ACTUALITÉS ADMIN
-        Route::get('/news', [NewsController::class, 'create'])->name('news');
+        Route::get('/news', [NewsController::class, 'adminIndex'])->name('news.index');
+        Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
         Route::post('/news', [NewsController::class, 'store'])->name('news.store');
 
         Route::get('/news/{id}/edit', [NewsController::class, 'edit'])->name('news.edit');
         Route::put('/news/{id}', [NewsController::class, 'update'])->name('news.update');
         Route::delete('/news/{id}', [NewsController::class, 'destroy'])->name('news.delete');
-        Route::get('/news/list', [NewsController::class, 'adminIndex'])->name('news.index');
+
         /*
         |--------------------------------------------------------------------------
         | 🥤 BUVETTE
