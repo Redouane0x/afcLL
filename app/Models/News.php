@@ -10,6 +10,7 @@ class News extends Model
         'title',
         'content',
         'image',
-        'is_published'
+        'is_published',
+        'is_featured'
     ];
 }

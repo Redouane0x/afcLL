@@ -1,93 +1,62 @@
 <x-app-layout>
 
     <x-slot name="header">
-        <h2 class="text-2xl font-bold">
-            📰 Gestion des actualités
-        </h2>
+        <h2 class="text-3xl font-bold">📰 Actualités</h2>
     </x-slot>
 
-    <div class="p-8 max-w-6xl mx-auto">
+    <div class="p-8 max-w-6xl mx-auto space-y-10">
 
-        {{-- HEADER --}}
-        <div class="flex justify-between items-center mb-6">
-            <p class="text-gray-600">
-                Liste des actualités
-            </p>
+        {{-- FEATURED --}}
+        @if($featured)
+            <div class="bg-white rounded-2xl shadow overflow-hidden">
 
-            <a href="{{ route('admin.news') }}"
-               class="bg-green-600 text-white px-4 py-2 rounded">
-                ➕ Nouvelle actu
-            </a>
-        </div>
+                @if($featured->image)
+                    <img src="{{ asset('storage/'.$featured->image) }}"
+                         class="w-full h-80 object-cover">
+                @endif
 
-        {{-- LISTE --}}
-        <div class="space-y-6">
+                <div class="p-6">
+                    <span class="text-yellow-500 font-bold">⭐ À la une</span>
 
-            @forelse($news as $item)
+                    <h2 class="text-2xl font-bold mt-2">
+                        {{ $featured->title }}
+                    </h2>
 
-                <div class="bg-white p-5 rounded-xl shadow">
-
-                    <div class="flex justify-between items-center">
-
-                        <div>
-                            <h3 class="font-bold text-lg">
-                                {{ $item->title }}
-                            </h3>
-
-                            <p class="text-sm text-gray-500">
-                                {{ $item->created_at->format('d/m/Y') }}
-                            </p>
-                        </div>
-
-                        {{-- STATUS --}}
-                        <span class="px-3 py-1 text-sm rounded
-                            {{ $item->is_published ? 'bg-green-200' : 'bg-gray-200' }}">
-                            {{ $item->is_published ? 'Publié' : 'Brouillon' }}
-                        </span>
-
-                    </div>
-
-                    {{-- IMAGE --}}
-                    @if($item->image)
-                        <img src="{{ asset('storage/'.$item->image) }}"
-                             class="mt-3 rounded max-h-60">
-                    @endif
-
-                    {{-- CONTENU --}}
-                    <p class="mt-3 text-gray-700">
-                        {{ Str::limit($item->content, 150) }}
+                    <p class="mt-3 text-gray-600">
+                        {{ $featured->content }}
                     </p>
-
-                    {{-- ACTIONS --}}
-                    <div class="flex gap-4 mt-4">
-
-                        <a href="{{ route('admin.news.edit', $item->id) }}"
-                           class="text-blue-600">
-                            ✏️ Modifier
-                        </a>
-
-                        <form method="POST"
-                              action="{{ route('admin.news.delete', $item->id) }}">
-                            @csrf
-                            @method('DELETE')
-
-                            <button onclick="return confirm('Supprimer ?')"
-                                    class="text-red-500">
-                                🗑 Supprimer
-                            </button>
-                        </form>
-
-                    </div>
-
                 </div>
 
-            @empty
+            </div>
+        @endif
 
-                <p class="text-center text-gray-500">
-                    Aucune actualité
-                </p>
+        {{-- LISTE --}}
+        <div class="grid md:grid-cols-2 gap-6">
 
-            @endforelse
+            @foreach($news as $item)
+
+                @if(!$featured || $item->id !== $featured->id)
+
+                    <div class="bg-white p-5 rounded-xl shadow">
+
+                        @if($item->image)
+                            <img src="{{ asset('storage/'.$item->image) }}"
+                                 class="mb-3 rounded h-40 w-full object-cover">
+                        @endif
+
+                        <h3 class="font-bold text-lg">
+                            {{ $item->title }}
+                        </h3>
+
+                        <p class="text-sm text-gray-600 mt-2">
+                            {{ Str::limit($item->content, 120) }}
+                        </p>
+
+                    </div>
+
+                @endif
+
+            @endforeach
 
         </div>
 

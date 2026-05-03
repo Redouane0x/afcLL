@@ -15,9 +15,12 @@
 
             <input type="file" name="image" class="mb-3">
 
+            <label class="block mb-2">
+                <input type="checkbox" name="is_published"> Publier
+            </label>
+
             <label class="block mb-3">
-                <input type="checkbox" name="is_published">
-                Publier
+                <input type="checkbox" name="is_featured"> ⭐ Mettre en avant
             </label>
 
             <button class="bg-green-600 text-white px-4 py-2 rounded">
