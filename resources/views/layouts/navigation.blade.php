@@ -30,7 +30,7 @@
 
                         <a href="/agenda" class="dropdown-link">Agenda</a>
                         <a href="/club" class="dropdown-link">Club</a>
-                        <a href="/actualites" class="dropdown-link">Actualités</a>
+                        <a href="{{ route('news.index') }}" class="dropdown-link">Actualités</a>
                         <a href="/galerie" class="dropdown-link">Galerie</a>
                         <a href="/contact" class="dropdown-link">Contact</a>
 
@@ -58,6 +58,7 @@
 
                 @auth
 
+                    {{-- ADMIN --}}
                     @if(auth()->user()->role === 'admin')
                         <div class="relative">
                             <button @click="admin = !admin" class="admin-btn">
@@ -68,7 +69,6 @@
                                  @click.outside="admin = false"
                                  class="dropdown right-0">
 
-                                {{-- ✅ FIX ICI --}}
                                 <a href="{{ route('admin.produits.index') }}" class="dropdown-link">
                                     Produits
                                 </a>
@@ -77,9 +77,13 @@
                                     Buvette
                                 </a>
 
-
                                 <a href="{{ route('admin.orders') }}" class="dropdown-link">
                                     Commandes
+                                </a>
+
+                                {{-- ✅ AJOUT ACTUALITÉS --}}
+                                <a href="{{ route('admin.news.index') }}" class="dropdown-link">
+                                    Actualités
                                 </a>
 
                             </div>
@@ -128,7 +132,7 @@
 
         <a href="/agenda" class="mobile-link">Agenda</a>
         <a href="/club" class="mobile-link">Club</a>
-        <a href="/actualites" class="mobile-link">Actualités</a>
+        <a href="{{ route('news.index') }}" class="mobile-link">Actualités</a>
         <a href="/galerie" class="mobile-link">Galerie</a>
         <a href="/contact" class="mobile-link">Contact</a>
 

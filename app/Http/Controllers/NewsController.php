@@ -81,4 +81,9 @@ class NewsController extends Controller
 
         return back()->with('success', 'Actu supprimée');
     }
+    public function adminIndex()
+    {
+        $news = News::latest()->get();
+        return view('pages.admin.news.index', compact('news'));
+    }
 }

@@ -140,6 +140,7 @@ Route::middleware(['auth'])
         Route::get('/news/{id}/edit', [NewsController::class, 'edit'])->name('news.edit');
         Route::put('/news/{id}', [NewsController::class, 'update'])->name('news.update');
         Route::delete('/news/{id}', [NewsController::class, 'destroy'])->name('news.delete');
+        Route::get('/news/list', [NewsController::class, 'adminIndex'])->name('news.index');
         /*
         |--------------------------------------------------------------------------
         | 🥤 BUVETTE
