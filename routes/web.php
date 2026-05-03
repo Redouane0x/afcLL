@@ -133,9 +133,13 @@ Route::middleware(['auth'])
         |--------------------------------------------------------------------------
         */
 
+        // ACTUALITÉS ADMIN
         Route::get('/news', [NewsController::class, 'create'])->name('news');
         Route::post('/news', [NewsController::class, 'store'])->name('news.store');
 
+        Route::get('/news/{id}/edit', [NewsController::class, 'edit'])->name('news.edit');
+        Route::put('/news/{id}', [NewsController::class, 'update'])->name('news.update');
+        Route::delete('/news/{id}', [NewsController::class, 'destroy'])->name('news.delete');
         /*
         |--------------------------------------------------------------------------
         | 🥤 BUVETTE
