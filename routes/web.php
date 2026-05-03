@@ -15,6 +15,7 @@ use App\Http\Controllers\GalleryController;
 */
 
 Route::view('/', 'pages.public.home')->name('home');
+
 Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda');
 
 Route::get('/boutique', [ProductController::class, 'index'])->name('shop.index');
@@ -38,12 +39,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | 📸 GALERIE (TOUT ICI 🔥)
+    | 📸 GALERIE
     |--------------------------------------------------------------------------
     */
 
     Route::get('/galerie', [GalleryController::class, 'index'])->name('gallery');
-
     Route::get('/galerie/create', [GalleryController::class, 'create'])->name('gallery.create');
     Route::post('/galerie', [GalleryController::class, 'store'])->name('gallery.store');
 
@@ -104,23 +104,42 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth']) // 👉 tu peux ajouter 'admin' ici si tu veux sécuriser
-->prefix('admin')
+Route::middleware(['auth'])
+    ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 
-    Route::resource('produits', ProductController::class)
-        ->names(['index' => 'products'])
-        ->except(['show']);
+        /*
+        |--------------------------------------------------------------------------
+        | 📦 PRODUITS
+        |--------------------------------------------------------------------------
+        */
+        Route::resource('produits', ProductController::class)->except(['show']);
 
-    Route::get('/commandes', [OrderController::class, 'adminOrders'])->name('orders');
-    Route::post('/commandes/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+        /*
+        |--------------------------------------------------------------------------
+        | 📦 COMMANDES ADMIN
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/commandes', [OrderController::class, 'adminOrders'])->name('orders');
 
-    Route::get('/buvette', [BuvetteController::class, 'adminIndex'])->name('buvette');
-    Route::get('/buvette/create', [BuvetteController::class, 'create'])->name('buvette.create');
-    Route::post('/buvette', [BuvetteController::class, 'store'])->name('buvette.store');
-    Route::delete('/buvette/{id}', [BuvetteController::class, 'destroy'])->name('buvette.delete');
-});
+        Route::post('/commandes/{id}/status', [OrderController::class, 'updateStatus'])
+            ->name('orders.status');
+
+        // ✅ EXPORT CSV (FIX)
+        Route::get('/commandes/export', [OrderController::class, 'export'])
+            ->name('orders.export');
+
+        /*
+        |--------------------------------------------------------------------------
+        | 🥤 BUVETTE ADMIN
+        |--------------------------------------------------------------------------
+        */
+        Route::get('/buvette', [BuvetteController::class, 'adminIndex'])->name('buvette');
+        Route::get('/buvette/create', [BuvetteController::class, 'create'])->name('buvette.create');
+        Route::post('/buvette', [BuvetteController::class, 'store'])->name('buvette.store');
+        Route::delete('/buvette/{id}', [BuvetteController::class, 'destroy'])->name('buvette.delete');
+    });
 
 /*
 |--------------------------------------------------------------------------
