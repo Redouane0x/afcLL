@@ -8,28 +8,51 @@
 
     <div class="p-8 max-w-6xl mx-auto">
 
-        {{-- 🔍 FILTRE --}}
-        <form method="GET" class="bg-white p-4 rounded-xl shadow mb-6 flex gap-4 flex-wrap">
+        {{-- 🔥 ACTIONS --}}
+        <div class="flex justify-between items-center mb-6">
 
-            <input type="text"
-                   name="search"
-                   value="{{ request('search') }}"
-                   placeholder="Rechercher utilisateur..."
-                   class="border p-2 rounded w-60">
+            {{-- FILTRE --}}
+            <form method="GET" class="bg-white p-4 rounded-xl shadow flex gap-4 flex-wrap">
 
-            <select name="status" class="border p-2 rounded">
-                <option value="">Tous les statuts</option>
-                <option value="en_attente">En attente</option>
-                <option value="en_preparation">En préparation</option>
-                <option value="prete">Prête</option>
-                <option value="livree">Livrée</option>
-            </select>
+                <input type="text"
+                       name="search"
+                       value="{{ request('search') }}"
+                       placeholder="Rechercher utilisateur..."
+                       class="border p-2 rounded w-60">
 
-            <button class="bg-blue-600 text-white px-4 py-2 rounded">
-                Filtrer
-            </button>
+                <select name="status" class="border p-2 rounded">
+                    <option value="">Tous les statuts</option>
 
-        </form>
+                    <option value="en_attente" {{ request('status')=='en_attente' ? 'selected' : '' }}>
+                        En attente
+                    </option>
+
+                    <option value="en_preparation" {{ request('status')=='en_preparation' ? 'selected' : '' }}>
+                        En préparation
+                    </option>
+
+                    <option value="prete" {{ request('status')=='prete' ? 'selected' : '' }}>
+                        Prête
+                    </option>
+
+                    <option value="livree" {{ request('status')=='livree' ? 'selected' : '' }}>
+                        Livrée
+                    </option>
+                </select>
+
+                <button class="bg-blue-600 text-white px-4 py-2 rounded">
+                    Filtrer
+                </button>
+
+            </form>
+
+            {{-- EXPORT CSV --}}
+            <a href="{{ route('admin.orders.export') }}"
+               class="bg-gray-800 text-white px-4 py-2 rounded shadow">
+                📥 Export CSV
+            </a>
+
+        </div>
 
         {{-- 📋 LISTE --}}
         <div class="space-y-6">
@@ -38,19 +61,29 @@
 
                 <div class="bg-white p-5 rounded-xl shadow">
 
+                    {{-- HEADER --}}
                     <div class="flex justify-between items-center mb-3">
+
                         <div>
                             <p class="font-bold">
                                 Commande #{{ $order->id }}
                             </p>
+
                             <p class="text-sm text-gray-500">
-                                {{ $order->user->name }}
+                                {{ $order->user?->name }}
                             </p>
                         </div>
 
-                        <span class="text-sm bg-gray-200 px-3 py-1 rounded">
+                        {{-- 🎨 STATUT COLOR --}}
+                        <span class="text-sm px-3 py-1 rounded
+                            {{ $order->status == 'livree' ? 'bg-green-200 text-green-700' : '' }}
+                            {{ $order->status == 'en_preparation' ? 'bg-yellow-200 text-yellow-700' : '' }}
+                            {{ $order->status == 'prete' ? 'bg-blue-200 text-blue-700' : '' }}
+                            {{ $order->status == 'en_attente' ? 'bg-gray-200 text-gray-700' : '' }}
+                        ">
                             {{ $order->status }}
                         </span>
+
                     </div>
 
                     {{-- 💰 TOTAL --}}
@@ -61,18 +94,31 @@
                     {{-- 🔄 UPDATE STATUS --}}
                     <form method="POST"
                           action="{{ route('admin.orders.status', $order->id) }}"
-                          class="flex gap-2">
+                          class="flex gap-2 items-center">
 
                         @csrf
 
                         <select name="status" class="border p-2 rounded">
-                            <option value="en_attente">En attente</option>
-                            <option value="en_preparation">En préparation</option>
-                            <option value="prete">Prête</option>
-                            <option value="livree">Livrée</option>
+
+                            <option value="en_attente" {{ $order->status=='en_attente' ? 'selected' : '' }}>
+                                En attente
+                            </option>
+
+                            <option value="en_preparation" {{ $order->status=='en_preparation' ? 'selected' : '' }}>
+                                En préparation
+                            </option>
+
+                            <option value="prete" {{ $order->status=='prete' ? 'selected' : '' }}>
+                                Prête
+                            </option>
+
+                            <option value="livree" {{ $order->status=='livree' ? 'selected' : '' }}>
+                                Livrée
+                            </option>
+
                         </select>
 
-                        <button class="bg-green-600 text-white px-3 rounded">
+                        <button class="bg-green-600 text-white px-3 py-2 rounded">
                             Modifier
                         </button>
 

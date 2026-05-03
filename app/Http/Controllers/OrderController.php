@@ -215,4 +215,36 @@ class OrderController extends Controller
 
         return view('pages.shop.order-show', compact('order'));
     }
+    public function export()
+    {
+        $orders = Order::with('user', 'products')->get();
+
+        $filename = "commandes.csv";
+
+        $headers = [
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+        ];
+
+        $callback = function () use ($orders) {
+            $file = fopen('php://output', 'w');
+
+            // entête CSV
+            fputcsv($file, ['ID', 'Utilisateur', 'Total', 'Statut', 'Date']);
+
+            foreach ($orders as $order) {
+                fputcsv($file, [
+                    $order->id,
+                    $order->user?->name,
+                    $order->total_price,
+                    $order->status,
+                    $order->created_at,
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\GalleryController;
 */
 
 Route::view('/', 'pages.public.home')->name('home');
+
 Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda');
 
 Route::get('/boutique', [ProductController::class, 'index'])->name('shop.index');
@@ -108,14 +109,32 @@ Route::middleware(['auth'])
     ->name('admin.')
     ->group(function () {
 
-        // ✅ PRODUITS (FIX IMPORTANT)
+        /*
+        |--------------------------------------------------------------------------
+        | 📦 PRODUITS
+        |--------------------------------------------------------------------------
+        */
         Route::resource('produits', ProductController::class)->except(['show']);
 
-        // COMMANDES
+        /*
+        |--------------------------------------------------------------------------
+        | 📦 COMMANDES ADMIN
+        |--------------------------------------------------------------------------
+        */
         Route::get('/commandes', [OrderController::class, 'adminOrders'])->name('orders');
-        Route::post('/commandes/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
 
-        // BUVETTE
+        Route::post('/commandes/{id}/status', [OrderController::class, 'updateStatus'])
+            ->name('orders.status');
+
+        // ✅ EXPORT CSV (FIX)
+        Route::get('/commandes/export', [OrderController::class, 'export'])
+            ->name('orders.export');
+
+        /*
+        |--------------------------------------------------------------------------
+        | 🥤 BUVETTE ADMIN
+        |--------------------------------------------------------------------------
+        */
         Route::get('/buvette', [BuvetteController::class, 'adminIndex'])->name('buvette');
         Route::get('/buvette/create', [BuvetteController::class, 'create'])->name('buvette.create');
         Route::post('/buvette', [BuvetteController::class, 'store'])->name('buvette.store');
