@@ -1,127 +1,94 @@
 <x-app-layout>
 
     <x-slot name="header">
-        <h2 class="text-2xl font-bold text-gray-800">
-            Gestion des commandes
+        <h2 class="text-2xl font-bold">
+            📦 Commandes (Admin)
         </h2>
     </x-slot>
 
-    <div class="p-8 max-w-6xl mx-auto space-y-6">
+    <div class="p-8 max-w-6xl mx-auto">
 
-        @forelse($orders as $order)
+        {{-- 🔍 FILTRE --}}
+        <form method="GET" class="bg-white p-4 rounded-xl shadow mb-6 flex gap-4 flex-wrap">
 
-            <div class="bg-white p-6 rounded-2xl shadow hover:shadow-lg transition">
+            <input type="text"
+                   name="search"
+                   value="{{ request('search') }}"
+                   placeholder="Rechercher utilisateur..."
+                   class="border p-2 rounded w-60">
 
-                {{-- HEADER --}}
-                <div class="flex justify-between items-center mb-4">
+            <select name="status" class="border p-2 rounded">
+                <option value="">Tous les statuts</option>
+                <option value="en_attente">En attente</option>
+                <option value="en_preparation">En préparation</option>
+                <option value="prete">Prête</option>
+                <option value="livree">Livrée</option>
+            </select>
 
-                    <div>
-                        <p class="font-bold text-lg">
-                            Commande #{{ $order->id }}
-                        </p>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded">
+                Filtrer
+            </button>
 
-                        <p class="text-sm text-gray-500">
-                            Client : {{ $order->user->name ?? 'N/A' }}
-                        </p>
+        </form>
 
-                        <p class="text-xs text-gray-400">
-                            {{ $order->created_at->format('d/m/Y H:i') }}
-                        </p>
-                    </div>
+        {{-- 📋 LISTE --}}
+        <div class="space-y-6">
 
-                    <div class="text-right">
+            @forelse($orders as $order)
 
-                        <p class="font-bold text-green-600 text-lg">
-                            {{ $order->total_price }} €
-                        </p>
+                <div class="bg-white p-5 rounded-xl shadow">
 
-                        {{-- BADGE STATUS --}}
-                        <span class="text-xs px-3 py-1 rounded-full font-semibold
-                            @if($order->status == 'payee') bg-green-100 text-green-700
-                            @elseif($order->status == 'en_preparation') bg-yellow-100 text-yellow-700
-                            @elseif($order->status == 'expediee') bg-blue-100 text-blue-700
-                            @elseif($order->status == 'livree') bg-gray-200 text-gray-700
-                            @endif
-                        ">
-                            {{ ucfirst(str_replace('_', ' ', $order->status)) }}
-                        </span>
-
-                    </div>
-
-                </div>
-
-                {{-- PRODUITS --}}
-                <div class="border-t pt-4 space-y-3">
-
-                    @foreach($order->products as $product)
-
-                        <div class="flex justify-between items-center text-sm">
-
-                            <div>
-                                <p class="font-medium">{{ $product->name }}</p>
-
-                                @if($product->pivot->custom_name)
-                                    <p class="text-xs text-blue-600">
-                                        Flocage : {{ $product->pivot->custom_name }}
-                                        #{{ $product->pivot->custom_number }}
-                                    </p>
-                                @endif
-                            </div>
-
-                            <span class="text-gray-600">
-                                x{{ $product->pivot->quantity }}
-                            </span>
-
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <p class="font-bold">
+                                Commande #{{ $order->id }}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                {{ $order->user->name }}
+                            </p>
                         </div>
 
-                    @endforeach
+                        <span class="text-sm bg-gray-200 px-3 py-1 rounded">
+                            {{ $order->status }}
+                        </span>
+                    </div>
+
+                    {{-- 💰 TOTAL --}}
+                    <p class="mb-3 font-semibold">
+                        Total : {{ $order->total_price }} €
+                    </p>
+
+                    {{-- 🔄 UPDATE STATUS --}}
+                    <form method="POST"
+                          action="{{ route('admin.orders.status', $order->id) }}"
+                          class="flex gap-2">
+
+                        @csrf
+
+                        <select name="status" class="border p-2 rounded">
+                            <option value="en_attente">En attente</option>
+                            <option value="en_preparation">En préparation</option>
+                            <option value="prete">Prête</option>
+                            <option value="livree">Livrée</option>
+                        </select>
+
+                        <button class="bg-green-600 text-white px-3 rounded">
+                            Modifier
+                        </button>
+
+                    </form>
 
                 </div>
 
-                {{-- ACTION --}}
-                <form method="POST"
-                      action="{{ route('admin.orders.status', $order->id) }}"
-                      class="mt-5 flex items-center gap-3">
+            @empty
 
-                    @csrf
+                <div class="text-center text-gray-500">
+                    Aucune commande trouvée
+                </div>
 
-                    <select name="status"
-                            class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500">
+            @endforelse
 
-                        <option value="en_preparation"
-                            {{ $order->status == 'en_preparation' ? 'selected' : '' }}>
-                            En préparation
-                        </option>
-
-                        <option value="expediee"
-                            {{ $order->status == 'expediee' ? 'selected' : '' }}>
-                            Expédiée
-                        </option>
-
-                        <option value="livree"
-                            {{ $order->status == 'livree' ? 'selected' : '' }}>
-                            Livrée
-                        </option>
-
-                    </select>
-
-                    <button
-                        onclick="return confirm('Confirmer le changement de statut ?')"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
-                        Mettre à jour
-                    </button>
-
-                </form>
-
-            </div>
-
-        @empty
-
-            <div class="text-center text-gray-500 py-10">
-                Aucune commande trouvée
-            </div>
-
-        @endforelse
+        </div>
 
     </div>
 

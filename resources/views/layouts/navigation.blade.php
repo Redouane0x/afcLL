@@ -58,7 +58,6 @@
 
                 @auth
 
-                    {{-- ADMIN --}}
                     @if(auth()->user()->role === 'admin')
                         <div class="relative">
                             <button @click="admin = !admin" class="admin-btn">
@@ -69,7 +68,8 @@
                                  @click.outside="admin = false"
                                  class="dropdown right-0">
 
-                                <a href="{{ route('admin.products') }}" class="dropdown-link">
+                                {{-- ✅ FIX ICI --}}
+                                <a href="{{ route('admin.produits.index') }}" class="dropdown-link">
                                     Produits
                                 </a>
 

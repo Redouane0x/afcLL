@@ -38,12 +38,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | 📸 GALERIE (TOUT ICI 🔥)
+    | 📸 GALERIE
     |--------------------------------------------------------------------------
     */
 
     Route::get('/galerie', [GalleryController::class, 'index'])->name('gallery');
-
     Route::get('/galerie/create', [GalleryController::class, 'create'])->name('gallery.create');
     Route::post('/galerie', [GalleryController::class, 'store'])->name('gallery.store');
 
@@ -104,23 +103,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth']) // 👉 tu peux ajouter 'admin' ici si tu veux sécuriser
-->prefix('admin')
+Route::middleware(['auth'])
+    ->prefix('admin')
     ->name('admin.')
     ->group(function () {
 
-    Route::resource('produits', ProductController::class)
-        ->names(['index' => 'products'])
-        ->except(['show']);
+        // ✅ PRODUITS (FIX IMPORTANT)
+        Route::resource('produits', ProductController::class)->except(['show']);
 
-    Route::get('/commandes', [OrderController::class, 'adminOrders'])->name('orders');
-    Route::post('/commandes/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+        // COMMANDES
+        Route::get('/commandes', [OrderController::class, 'adminOrders'])->name('orders');
+        Route::post('/commandes/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
 
-    Route::get('/buvette', [BuvetteController::class, 'adminIndex'])->name('buvette');
-    Route::get('/buvette/create', [BuvetteController::class, 'create'])->name('buvette.create');
-    Route::post('/buvette', [BuvetteController::class, 'store'])->name('buvette.store');
-    Route::delete('/buvette/{id}', [BuvetteController::class, 'destroy'])->name('buvette.delete');
-});
+        // BUVETTE
+        Route::get('/buvette', [BuvetteController::class, 'adminIndex'])->name('buvette');
+        Route::get('/buvette/create', [BuvetteController::class, 'create'])->name('buvette.create');
+        Route::post('/buvette', [BuvetteController::class, 'store'])->name('buvette.store');
+        Route::delete('/buvette/{id}', [BuvetteController::class, 'destroy'])->name('buvette.delete');
+    });
 
 /*
 |--------------------------------------------------------------------------

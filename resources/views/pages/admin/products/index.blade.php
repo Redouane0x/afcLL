@@ -14,8 +14,8 @@
                 Liste de tous les produits disponibles
             </p>
 
-            {{-- 🔥 BOUTON IMPORTANT --}}
-            <a href="{{ route('admin.products.create') }}"
+            {{-- ✅ FIX ICI --}}
+            <a href="{{ route('admin.produits.create') }}"
                class="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg shadow">
                 ➕ Ajouter un produit
             </a>
@@ -62,12 +62,14 @@
                         {{-- ACTIONS --}}
                         <div class="flex justify-between mt-4">
 
-                            <a href="{{ route('admin.products.edit', $product->id) }}"
+                            {{-- ✅ FIX --}}
+                            <a href="{{ route('admin.produits.edit', $product->id) }}"
                                class="text-blue-600 text-sm">
                                 Modifier
                             </a>
 
-                            <form method="POST" action="{{ route('admin.products.delete', $product->id) }}">
+                            {{-- ✅ FIX --}}
+                            <form method="POST" action="{{ route('admin.produits.destroy', $product->id) }}">
                                 @csrf
                                 @method('DELETE')
 
