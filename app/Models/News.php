@@ -4,12 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BuvetteProduct extends Model
+class News extends Model
 {
     protected $fillable = [
-        'name',
-        'price',
-        'stock',
-        'image'
+        'title',
+        'content',
+        'image',
+        'is_published'
     ];
 }
