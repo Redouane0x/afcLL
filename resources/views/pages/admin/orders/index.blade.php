@@ -11,7 +11,7 @@
         {{-- 🔥 ACTIONS --}}
         <div class="flex justify-between items-center mb-6">
 
-            {{-- FILTRE --}}
+            {{-- FILTRE + RECHERCHE --}}
             <form method="GET" class="bg-white p-4 rounded-xl shadow flex gap-4 flex-wrap">
 
                 <input type="text"
@@ -46,7 +46,7 @@
 
             </form>
 
-            {{-- EXPORT CSV --}}
+            {{-- EXPORT --}}
             <a href="{{ route('admin.orders.export') }}"
                class="bg-gray-800 text-white px-4 py-2 rounded shadow">
                 📥 Export CSV
@@ -74,8 +74,16 @@
                             </p>
                         </div>
 
-                        {{-- 🎨 STATUT COLOR --}}
-                        <span class="text-sm px-3 py-1 rounded
+                        <div class="flex items-center gap-3">
+
+                            {{-- 🔥 BOUTON VOIR (AJOUT IMPORTANT) --}}
+                            <a href="{{ route('admin.orders.show', $order->id) }}"
+                               class="bg-blue-600 text-white px-3 py-1 rounded">
+                                Voir
+                            </a>
+
+                            {{-- STATUT --}}
+                            <span class="text-sm px-3 py-1 rounded
                             {{ $order->status == 'livree' ? 'bg-green-200 text-green-700' : '' }}
                             {{ $order->status == 'en_preparation' ? 'bg-yellow-200 text-yellow-700' : '' }}
                             {{ $order->status == 'prete' ? 'bg-blue-200 text-blue-700' : '' }}
@@ -83,6 +91,8 @@
                         ">
                             {{ $order->status }}
                         </span>
+
+                        </div>
 
                     </div>
 
