@@ -14,8 +14,16 @@ class News extends Model
         'is_featured'
     ];
 
+    // 💬 COMMENTAIRES
     public function comments()
     {
         return $this->hasMany(NewsComment::class);
     }
+
+    // ❤️ LIKES (AJOUT IMPORTANT)
+    public function likes()
+    {
+        return $this->hasMany(\App\Models\NewsLike::class);
+    }
+
 }

@@ -20,14 +20,17 @@ class OrderController extends Controller
 
         $quantity = max(1, (int)$request->quantity);
 
-        // 🚫 STOCK
+        // 🔥 OBLIGER TAILLE
+        if ($product->sizes && !$request->size) {
+            return back()->with('error', 'Veuillez sélectionner une taille');
+        }
+
         if ($quantity > $product->stock_quantity) {
-            return back()->with('error', 'Stock insuffisant (max: ' . $product->stock_quantity . ')');
+            return back()->with('error', 'Stock insuffisant');
         }
 
         $cart = session()->get('cart', []);
 
-        // 🔥 cumul dans panier
         $existingQuantity = collect($cart)
             ->where('product_id', $product->id)
             ->sum('quantity');
@@ -50,7 +53,6 @@ class OrderController extends Controller
 
         return redirect()->route('cart')->with('success', 'Produit ajouté au panier');
     }
-
     /*
     |--------------------------------------------------------------------------
     | 🛒 PANIER

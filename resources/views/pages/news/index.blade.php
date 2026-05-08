@@ -7,7 +7,7 @@
     <div class="p-8 max-w-6xl mx-auto space-y-10">
 
         {{-- FEATURED --}}
-        @if(isset($featured) && $featured)
+        @if($featured)
             <div class="bg-white rounded-2xl shadow overflow-hidden">
 
                 @if($featured->image)
@@ -52,7 +52,17 @@
                             {{ \Illuminate\Support\Str::limit($item->content, 120) }}
                         </p>
 
-                        {{-- COMMENTAIRES --}}
+                        {{-- ❤️ LIKE --}}
+                        @auth
+                            <form method="POST" action="{{ route('news.like', $item->id) }}">
+                                @csrf
+                                <button class="text-red-500 font-semibold mt-2">
+                                    ❤️ {{ $item->likes->count() }}
+                                </button>
+                            </form>
+                        @endauth
+
+                        {{-- 💬 COMMENTAIRES --}}
                         <div class="mt-4 space-y-2">
                             @foreach($item->comments as $comment)
                                 <p class="text-sm">
@@ -62,7 +72,7 @@
                             @endforeach
                         </div>
 
-                        {{-- AJOUT COMMENT --}}
+                        {{-- ✍️ AJOUT COMMENT --}}
                         @auth
                             <form method="POST"
                                   action="{{ route('news.comment', $item->id) }}"

@@ -9,6 +9,7 @@
     <div class="py-10">
         <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-10">
 
+            {{-- IMAGE --}}
             <div class="bg-white p-6 rounded-2xl shadow">
                 @if($product->image_url)
                     <img src="{{ asset('storage/' . $product->image_url) }}"
@@ -16,6 +17,7 @@
                 @endif
             </div>
 
+            {{-- INFOS --}}
             <div class="bg-white p-6 rounded-2xl shadow">
 
                 <h1 class="text-3xl font-bold mb-2">{{ $product->name }}</h1>
@@ -36,7 +38,39 @@
                     <input type="hidden" name="price" value="{{ $product->price }}">
                     <input type="hidden" name="size" id="selectedSize">
 
-                    {{-- ✅ QUANTITÉ --}}
+                    {{-- 🔥 TAILLES --}}
+                    @if($product->sizes_array)
+                        <div class="mb-6">
+                            <label class="block font-semibold mb-2">Choisir une taille</label>
+
+                            <div class="flex gap-2 flex-wrap">
+                                @foreach($product->sizes_array as $size)
+                                    <button type="button"
+                                            onclick="selectSize('{{ $size }}', this)"
+                                            class="size-btn border px-4 py-2 rounded-lg hover:bg-gray-200">
+                                        {{ $size }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- 🔥 FLOQUAGE --}}
+                    @if($product->customizable)
+                        <div class="mb-6">
+                            <p class="font-semibold mb-2">Personnalisation</p>
+
+                            <input name="custom_name"
+                                   placeholder="Nom (optionnel)"
+                                   class="w-full border p-2 rounded mb-2">
+
+                            <input name="custom_number"
+                                   placeholder="Numéro (optionnel)"
+                                   class="w-full border p-2 rounded">
+                        </div>
+                    @endif
+
+                    {{-- QUANTITÉ --}}
                     <div class="mb-6">
                         <label class="block font-semibold mb-2">Quantité</label>
 
@@ -58,5 +92,18 @@
 
         </div>
     </div>
+
+    {{-- SCRIPT TAILLES --}}
+    <script>
+        function selectSize(size, el) {
+            document.getElementById('selectedSize').value = size;
+
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.classList.remove('bg-green-600', 'text-white');
+            });
+
+            el.classList.add('bg-green-600', 'text-white');
+        }
+    </script>
 
 </x-app-layout>

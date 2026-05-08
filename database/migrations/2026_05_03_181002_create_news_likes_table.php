@@ -6,19 +6,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
-        Schema::create('news_comments', function (Blueprint $table) {
+        Schema::create('news_likes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('news_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->text('content');
             $table->timestamps();
+
+            $table->unique(['news_id', 'user_id']);
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('news_comments');
+        Schema::dropIfExists('news_likes');
     }
 };

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\News;
 use App\Models\NewsComment;
 use Illuminate\Http\Request;
+use App\Models\NewsLike;
 
 class NewsController extends Controller
 {
@@ -118,6 +119,25 @@ class NewsController extends Controller
             'user_id' => auth()->id(),
             'content' => $request->content
         ]);
+
+        return back();
+    }
+    public function like($id)
+    {
+        $userId = auth()->id();
+
+        $like = NewsLike::where('news_id', $id)
+            ->where('user_id', $userId)
+            ->first();
+
+        if ($like) {
+            $like->delete(); // unlike
+        } else {
+            NewsLike::create([
+                'news_id' => $id,
+                'user_id' => $userId
+            ]);
+        }
 
         return back();
     }

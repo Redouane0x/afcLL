@@ -7,25 +7,16 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | 🛍️ PARTIE UTILISATEUR + ADMIN (index intelligent)
-    |--------------------------------------------------------------------------
-    */
-
     public function index()
     {
-        // 🔥 on exclut la buvette
         $products = Product::where('type', '!=', 'buvette')
             ->latest()
             ->get();
 
-        // 👉 SI ADMIN → vue admin (avec bouton ajouter)
         if (auth()->check() && auth()->user()->role === 'admin') {
             return view('pages.admin.products.index', compact('products'));
         }
 
-        // 👉 SINON → vue publique
         return view('pages.shop.index', compact('products'));
     }
 
@@ -37,19 +28,11 @@ class ProductController extends Controller
         return view('pages.shop.show', compact('product'));
     }
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | 🛠️ PARTIE ADMIN
-    |--------------------------------------------------------------------------
-    */
-
     public function create()
     {
         return view('pages.admin.products.create');
     }
 
-    // 💾 STORE
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -58,12 +41,12 @@ class ProductController extends Controller
             'stock_quantity' => 'required|integer',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'type' => 'required|in:tshirt,short,manteau,autre',
-            'sizes' => 'nullable|string',
+            'sizes' => 'nullable|array', // ✅ FIX
             'material' => 'nullable|string',
             'dimensions' => 'nullable|string',
         ]);
 
-        // 📸 Upload image
+        // IMAGE
         if ($request->hasFile('image')) {
             $file = $request->file('image');
 
@@ -76,16 +59,20 @@ class ProductController extends Controller
             $data['image_url'] = $path;
         }
 
+        // 🔥 IMPORTANT
+        $data['sizes'] = $request->sizes
+            ? implode(',', $request->sizes)
+            : null;
+
         $data['customizable'] = $request->has('customizable');
 
         Product::create($data);
 
         return redirect()
-            ->route('admin.products')
+            ->route('admin.produits.index') // ✅ FIX ROUTE
             ->with('success', 'Produit ajouté');
     }
 
-    // ✏️ EDIT
     public function edit($id)
     {
         $product = Product::where('type', '!=', 'buvette')
@@ -94,7 +81,6 @@ class ProductController extends Controller
         return view('pages.admin.products.edit', compact('product'));
     }
 
-    // 🔄 UPDATE
     public function update(Request $request, $id)
     {
         $product = Product::where('type', '!=', 'buvette')
@@ -106,12 +92,11 @@ class ProductController extends Controller
             'stock_quantity' => 'required|integer',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'type' => 'required|in:tshirt,short,manteau,autre',
-            'sizes' => 'nullable|string',
+            'sizes' => 'nullable|array',
             'material' => 'nullable|string',
             'dimensions' => 'nullable|string',
         ]);
 
-        // 📸 Update image
         if ($request->hasFile('image')) {
             $file = $request->file('image');
 
@@ -124,16 +109,19 @@ class ProductController extends Controller
             $data['image_url'] = $path;
         }
 
+        $data['sizes'] = $request->sizes
+            ? implode(',', $request->sizes)
+            : null;
+
         $data['customizable'] = $request->has('customizable');
 
         $product->update($data);
 
         return redirect()
-            ->route('admin.products')
+            ->route('admin.produits.index')
             ->with('success', 'Produit modifié');
     }
 
-    // ❌ DELETE
     public function destroy($id)
     {
         Product::where('type', '!=', 'buvette')
@@ -141,7 +129,7 @@ class ProductController extends Controller
             ->delete();
 
         return redirect()
-            ->route('admin.products')
+            ->route('admin.produits.index')
             ->with('success', 'Produit supprimé');
     }
 }
