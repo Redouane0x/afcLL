@@ -55,21 +55,20 @@ class Product extends Model
     |--------------------------------------------------------------------------
     */
 
-    // Produit personnalisable ?
     public function isCustomizable()
     {
         return $this->customizable;
     }
 
-    // Produit vestimentaire
     public function isClothing()
     {
         return in_array($this->type, ['tshirt', 'short', 'manteau']);
     }
 
-    // Tailles en tableau (optionnel 🔥)
     public function getSizesArrayAttribute()
     {
-        return $this->sizes ? explode(',', $this->sizes) : [];
+        return $this->sizes
+            ? array_map('trim', explode(',', $this->sizes))
+            : [];
     }
 }

@@ -1,44 +1,32 @@
-<nav x-data="{ open: false, more: false, admin: false }"
+<nav x-data="{ open: false, submenu: null }"
+     @keydown.escape.window="open = false; submenu = null"
      class="bg-green-700 shadow-md sticky top-0 z-50">
 
     <div class="max-w-7xl mx-auto px-4">
         <div class="flex items-center justify-between h-16">
 
-            {{-- LOGO --}}
-            <a href="/" class="flex items-center gap-2 text-white font-bold text-lg">
-                <img src="/images/logo.png" class="w-9 h-9 rounded"
-                     onerror="this.src='https://via.placeholder.com/40'">
-                AFCLL
-            </a>
+            {{-- LEFT --}}
+            <div class="flex items-center gap-4">
+                <button @click="open = true" class="text-white text-xl">☰</button>
 
-            {{-- MENU CENTER --}}
+                <a href="/" class="flex items-center gap-2 text-white font-bold text-lg">
+                    <img src="/images/logo.png" class="w-9 h-9 rounded"
+                         onerror="this.src='https://via.placeholder.com/40'">
+                    AFCLL
+                </a>
+            </div>
+
+            {{-- CENTER --}}
             <div class="hidden lg:flex items-center gap-6">
-
                 <a href="/" class="nav-link">Accueil</a>
                 <a href="/boutique" class="nav-link">Boutique</a>
-                <a href="{{ route('buvette') }}" class="nav-link">Buvette</a>
+            </div>
 
-                {{-- DROPDOWN --}}
-                <div class="relative">
-                    <button @click="more = !more" class="nav-link">
-                        Explorer ▾
-                    </button>
-
-                    <div x-show="more"
-                         @click.outside="more = false"
-                         class="dropdown">
-
-                        <a href="/agenda" class="dropdown-link">Agenda</a>
-                        <a href="/club" class="dropdown-link">Club</a>
-                        <a href="/actualites" class="dropdown-link">Actualités</a>
-                        <a href="/galerie" class="dropdown-link">Galerie</a>
-                        <a href="/contact" class="dropdown-link">Contact</a>
-
-                    </div>
-                </div>
+            {{-- RIGHT --}}
+            <div class="hidden lg:flex items-center gap-3">
 
                 <a href="{{ route('cart') }}" class="nav-link flex items-center gap-1">
-                    Panier
+                    🛒
                     @php $count = count(session('cart', [])); @endphp
                     @if($count > 0)
                         <span class="badge">{{ $count }}</span>
@@ -46,101 +34,145 @@
                 </a>
 
                 @auth
-                    <a href="{{ route('orders.index') }}" class="nav-link">
-                        Commandes
-                    </a>
-                @endauth
-
-            </div>
-
-            {{-- RIGHT SIDE --}}
-            <div class="hidden lg:flex items-center gap-3">
-
-                @auth
-
-                    @if(auth()->user()->role === 'admin')
-                        <div class="relative">
-                            <button @click="admin = !admin" class="admin-btn">
-                                Admin ▾
-                            </button>
-
-                            <div x-show="admin"
-                                 @click.outside="admin = false"
-                                 class="dropdown right-0">
-
-                                {{-- ✅ FIX ICI --}}
-                                <a href="{{ route('admin.produits.index') }}" class="dropdown-link">
-                                    Produits
-                                </a>
-
-                                <a href="{{ route('admin.buvette') }}" class="dropdown-link">
-                                    Buvette
-                                </a>
-
-
-                                <a href="{{ route('admin.orders') }}" class="dropdown-link">
-                                    Commandes
-                                </a>
-
-                            </div>
-                        </div>
-                    @endif
-
-                    <a href="{{ route('dashboard') }}" class="nav-link">
-                        Mon espace
-                    </a>
+                    <a href="{{ route('dashboard') }}" class="nav-link">Mon espace</a>
 
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button class="logout-btn">
-                            Déconnexion
-                        </button>
+                        <button class="logout-btn">Déconnexion</button>
                     </form>
-
                 @else
-
-                    <a href="{{ route('login') }}" class="nav-link">
-                        Connexion
-                    </a>
-
-                    <a href="{{ route('register') }}" class="register-btn">
-                        Inscription
-                    </a>
-
+                    <a href="{{ route('login') }}" class="nav-link">Connexion</a>
+                    <a href="{{ route('register') }}" class="register-btn">Inscription</a>
                 @endauth
 
             </div>
-
-            {{-- MOBILE --}}
-            <button @click="open = !open" class="lg:hidden text-white text-xl">
-                ☰
-            </button>
 
         </div>
     </div>
 
-    {{-- MOBILE MENU --}}
-    <div x-show="open" class="lg:hidden bg-green-800 px-4 py-4 space-y-2">
+    {{-- OVERLAY --}}
+    <div x-show="open"
+         x-transition.opacity
+         @click="open = false; submenu = null"
+         class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40">
+    </div>
 
-        <a href="/" class="mobile-link">Accueil</a>
-        <a href="/boutique" class="mobile-link">Boutique</a>
-        <a href="{{ route('buvette') }}" class="mobile-link">Buvette</a>
+    {{-- MENU --}}
+    <div x-show="open"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-x-10"
+         x-transition:enter-end="opacity-100 translate-x-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-end="opacity-0 -translate-x-10"
+         class="fixed inset-y-0 left-0 z-50 flex">
 
-        <a href="/agenda" class="mobile-link">Agenda</a>
-        <a href="/club" class="mobile-link">Club</a>
-        <a href="/actualites" class="mobile-link">Actualités</a>
-        <a href="/galerie" class="mobile-link">Galerie</a>
-        <a href="/contact" class="mobile-link">Contact</a>
+        {{-- LEFT --}}
+        <div class="w-80 bg-white p-6 space-y-4 shadow-xl">
 
-        <a href="{{ route('cart') }}" class="mobile-link">
-            Panier ({{ count(session('cart', [])) }})
-        </a>
+            <button @click="open = false; submenu = null" class="mb-4 text-xl">✕</button>
 
-        @auth
-            <a href="{{ route('orders.index') }}" class="mobile-link">
-                Mes commandes
-            </a>
-        @endauth
+            <div class="menu-item" @click="submenu = 'actus'">Actualités ></div>
+            <div class="menu-item" @click="submenu = 'equipes'">Equipes ></div>
+            <div class="menu-item" @click="submenu = 'shop'">Boutique ></div>
+
+            <div class="menu-item"><a href="/agenda">Agenda</a></div>
+            <div class="menu-item"><a href="/club">Club</a></div>
+            <div class="menu-item"><a href="/galerie">Galerie</a></div>
+            <div class="menu-item"><a href="/contact">Contact</a></div>
+
+            @auth
+                @if(auth()->user()->role === 'admin')
+                    <div class="menu-item" @click="submenu = 'admin'">Admin ></div>
+                @endif
+            @endauth
+
+        </div>
+
+        {{-- RIGHT --}}
+        <div class="w-[500px] bg-white/70 backdrop-blur-sm p-10 overflow-y-auto">
+
+            {{-- DEFAULT --}}
+            <div x-show="!submenu">
+                <h2 class="text-2xl font-bold mb-4">Bienvenue</h2>
+                <p class="text-gray-500">Sélectionne une section</p>
+            </div>
+
+            {{-- ACTUS --}}
+            <div x-show="submenu === 'actus'"
+                 x-transition
+                 class="space-y-6">
+
+                <div class="img-hover">
+                    <img src="https://via.placeholder.com/400x200">
+                </div>
+
+                <h2 class="text-2xl font-bold">Actualités</h2>
+
+                <p class="text-gray-600 leading-relaxed">
+                    Toutes les news du club
+                </p>
+
+                <div class="pt-2">
+                    <a href="{{ route('news.index') }}" class="submenu-btn">
+                        Voir
+                    </a>
+                </div>
+
+            </div>
+
+            {{-- SHOP --}}
+            <div x-show="submenu === 'shop'"
+                 x-transition
+                 class="space-y-6">
+
+                <div class="img-hover">
+                    <img src="https://via.placeholder.com/400x200">
+                </div>
+
+                <h2 class="text-2xl font-bold">Boutique</h2>
+
+                <p class="text-gray-600">
+                    Équipements du club
+                </p>
+
+                <a href="/boutique" class="submenu-btn">
+                    Voir
+                </a>
+
+            </div>
+
+            {{-- EQUIPES --}}
+            <div x-show="submenu === 'equipes'"
+                 x-transition
+                 class="space-y-6">
+
+                <h2 class="text-2xl font-bold">Equipes</h2>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="submenu-card">Seniors</div>
+                    <div class="submenu-card">U18</div>
+                    <div class="submenu-card">U15</div>
+                    <div class="submenu-card">U13</div>
+                </div>
+
+            </div>
+
+            {{-- ADMIN --}}
+            <div x-show="submenu === 'admin'"
+                 x-transition
+                 class="space-y-8">
+
+                <h2 class="text-3xl font-bold">Admin</h2>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <a href="{{ route('admin.produits.index') }}" class="submenu-card">Produits</a>
+                    <a href="{{ route('admin.orders') }}" class="submenu-card">Commandes</a>
+                    <a href="{{ route('admin.news.index') }}" class="submenu-card">Actus</a>
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
 
@@ -151,32 +183,64 @@
         color: white;
         padding: 6px 10px;
         border-radius: 6px;
-        font-size: 14px;
-        transition: 0.2s;
     }
     .nav-link:hover {
         background-color: #15803d;
     }
 
-    .dropdown {
-        position: absolute;
-        top: 45px;
-        left: 0;
-        width: 200px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        padding: 8px 0;
-        z-index: 999;
+    .menu-item {
+        padding: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: 0.2s;
+    }
+    .menu-item:hover {
+        background: #f3f4f6;
+        transform: translateX(5px);
     }
 
-    .dropdown-link {
-        display: block;
-        padding: 8px 16px;
-        font-size: 14px;
+    .img-hover {
+        overflow: hidden;
+        border-radius: 12px;
     }
-    .dropdown-link:hover {
-        background: #f3f4f6;
+    .img-hover img {
+        width: 100%;
+        transition: transform 0.5s ease;
+    }
+    .img-hover:hover img {
+        transform: scale(1.08);
+    }
+
+    .submenu-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #15803d;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: 0.25s;
+    }
+    .submenu-btn::after {
+        content: "→";
+        transition: 0.25s;
+    }
+    .submenu-btn:hover::after {
+        transform: translateX(5px);
+    }
+
+    .submenu-card {
+        background: white;
+        padding: 20px;
+        border-radius: 14px;
+        border: 1px solid #eee;
+        transition: 0.3s;
+    }
+    .submenu-card:hover {
+        transform: translateY(-6px) scale(1.03);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
     }
 
     .badge {
@@ -184,14 +248,6 @@
         font-size: 10px;
         padding: 2px 6px;
         border-radius: 999px;
-    }
-
-    .admin-btn {
-        background: white;
-        color: #15803d;
-        padding: 5px 10px;
-        border-radius: 6px;
-        font-weight: bold;
     }
 
     .register-btn {
@@ -206,15 +262,5 @@
     }
     .logout-btn:hover {
         color: white;
-    }
-
-    .mobile-link {
-        display: block;
-        color: white;
-        padding: 8px;
-        border-radius: 6px;
-    }
-    .mobile-link:hover {
-        background: #15803d;
     }
 </style>

@@ -1,31 +1,84 @@
 <x-app-layout>
-    <div class="py-12 max-w-7xl mx-auto sm:px-6 lg:px-8">
 
-        <div class="p-8 text-center text-white bg-green-800 rounded-lg shadow-md">
-            <h1 class="text-4xl font-bold mb-2">AFC Liébaüt</h1>
-            <p class="text-lg mb-6">Club de football - Passion & Performance</p>
+    {{-- HERO --}}
+    <section class="hero">
+        <div class="hero-overlay"></div>
 
-            <a href="/agenda" class="inline-block px-6 py-2 bg-white text-green-800 font-semibold rounded hover:bg-gray-100 transition">
-                Voir les matchs
-            </a>
-        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">AFC Liébaüt</h1>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h5 class="text-xl font-bold text-green-800 mb-2">Agenda</h5>
-                <p class="text-gray-600">Découvrez les prochains matchs</p>
-            </div>
+            <p class="hero-subtitle">
+                Passion • Respect • Discipline
+            </p>
 
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h5 class="text-xl font-bold text-green-800 mb-2">Boutique</h5>
-                <p class="text-gray-600">Maillots et équipements</p>
-            </div>
-
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h5 class="text-xl font-bold text-green-800 mb-2">Club</h5>
-                <p class="text-gray-600">Découvrez notre histoire</p>
+            <div class="hero-buttons">
+                <a href="/boutique" class="btn-primary">Boutique</a>
+                <a href="/actualites" class="btn-secondary">Actualités</a>
             </div>
         </div>
+    </section>
 
-    </div>
+    {{-- ACTUALITÉS --}}
+    <section class="section">
+        <div class="container">
+
+            <h2 class="section-title reveal">Actualités</h2>
+
+            <div class="grid-cards">
+
+                @forelse($news as $index => $item)
+                    <div class="card reveal delay-{{ $index + 1 }}">
+
+                        <img src="{{ $item->image ? asset('storage/'.$item->image) : 'https://via.placeholder.com/400x200' }}">
+
+                        <div class="card-body">
+                            <h3>{{ $item->title }}</h3>
+                            <p>{{ \Illuminate\Support\Str::limit($item->content, 100) }}</p>
+                        </div>
+
+                    </div>
+                @empty
+                    <p>Aucune actualité</p>
+                @endforelse
+
+            </div>
+
+        </div>
+    </section>
+
+    {{-- BOUTIQUE --}}
+    <section class="section bg-light">
+        <div class="container">
+
+            <h2 class="section-title reveal">Boutique officielle</h2>
+
+            <div class="grid-cards">
+
+                @forelse($products as $index => $product)
+                    <div class="card reveal delay-{{ $index + 1 }}">
+
+                        <img src="{{ $product->image_url ? asset('storage/'.$product->image_url) : 'https://via.placeholder.com/300' }}">
+
+                        <div class="card-body">
+                            <h3>{{ $product->name }}</h3>
+                            <p class="price">{{ $product->price }} €</p>
+                        </div>
+
+                    </div>
+                @empty
+                    <p>Aucun produit</p>
+                @endforelse
+
+            </div>
+
+        </div>
+    </section>
+
+    {{-- CTA --}}
+    <section class="cta reveal">
+        <h2>Rejoins le club</h2>
+        <p>Inscris-toi et fais partie de l’aventure AFCLL</p>
+        <a href="/contact" class="btn-primary">Nous contacter</a>
+    </section>
+
 </x-app-layout>

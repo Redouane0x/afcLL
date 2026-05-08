@@ -1,12 +1,15 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\BuvetteController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\NewsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,15 +17,21 @@ use App\Http\Controllers\GalleryController;
 |--------------------------------------------------------------------------
 */
 
-Route::view('/', 'pages.public.home')->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda');
 
+// 🛍️ SHOP
 Route::get('/boutique', [ProductController::class, 'index'])->name('shop.index');
+Route::get('/boutique/{id}', [ProductController::class, 'show'])->name('shop.show');
 
+// 📰 ACTUALITÉS
+Route::get('/actualites', [NewsController::class, 'index'])->name('news.index');
+
+// 📄 PAGES
 Route::view('/club', 'pages.public.club')->name('club');
-Route::view('/actualites', 'pages.public.actualites')->name('actualites');
 Route::view('/contact', 'pages.public.contact')->name('contact');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -32,10 +41,7 @@ Route::view('/contact', 'pages.public.contact')->name('contact');
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', function () {
-        return view('pages.user.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', fn () => view('pages.user.dashboard'))->name('dashboard');
 
     /*
     |--------------------------------------------------------------------------
@@ -43,34 +49,52 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/galerie', [GalleryController::class, 'index'])->name('gallery');
-    Route::get('/galerie/create', [GalleryController::class, 'create'])->name('gallery.create');
-    Route::post('/galerie', [GalleryController::class, 'store'])->name('gallery.store');
+    Route::prefix('galerie')->group(function () {
 
-    Route::get('/galerie/{id}/edit', [GalleryController::class, 'edit'])->name('gallery.edit');
-    Route::put('/galerie/{id}', [GalleryController::class, 'update'])->name('gallery.update');
+        Route::get('/', [GalleryController::class, 'index'])->name('gallery');
+        Route::get('/create', [GalleryController::class, 'create'])->name('gallery.create');
+        Route::post('/', [GalleryController::class, 'store'])->name('gallery.store');
 
-    Route::post('/galerie/{id}/like', [GalleryController::class, 'like'])->name('gallery.like');
-    Route::post('/galerie/{id}/comment', [GalleryController::class, 'comment'])->name('gallery.comment');
+        Route::get('/{id}/edit', [GalleryController::class, 'edit'])->name('gallery.edit');
+        Route::put('/{id}', [GalleryController::class, 'update'])->name('gallery.update');
 
-    Route::delete('/galerie/{id}', [GalleryController::class, 'destroy'])->name('gallery.delete');
+        Route::post('/{id}/like', [GalleryController::class, 'like'])->name('gallery.like');
+        Route::post('/{id}/comment', [GalleryController::class, 'comment'])->name('gallery.comment');
+
+        Route::delete('/{id}', [GalleryController::class, 'destroy'])->name('gallery.delete');
+    });
+
     Route::delete('/comment/{id}', [GalleryController::class, 'deleteComment'])->name('comment.delete');
+
 
     /*
     |--------------------------------------------------------------------------
-    | 🛒 SHOP
+    | 📰 ACTUALITÉS (USER)
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/boutique/{id}', [ProductController::class, 'show'])->name('shop.show');
+    Route::post('/news/{id}/comment', [NewsController::class, 'comment'])->name('news.comment');
+    Route::post('/news/{id}/like', [NewsController::class, 'like'])->name('news.like');
 
-    Route::get('/panier', [OrderController::class, 'cart'])->name('cart');
-    Route::post('/panier/ajouter', [OrderController::class, 'add'])->name('cart.add');
-    Route::post('/panier/remove/{index}', [OrderController::class, 'remove'])->name('cart.remove');
 
     /*
     |--------------------------------------------------------------------------
-    | 💳 COMMANDES
+    | 🛒 PANIER
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('panier')->group(function () {
+
+        Route::get('/', [OrderController::class, 'cart'])->name('cart');
+        Route::post('/ajouter', [OrderController::class, 'add'])->name('cart.add');
+        Route::post('/remove/{index}', [OrderController::class, 'remove'])->name('cart.remove');
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 💳 COMMANDES (USER)
     |--------------------------------------------------------------------------
     */
 
@@ -79,6 +103,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/mes-commandes', [OrderController::class, 'myOrders'])->name('orders.index');
     Route::get('/mes-commandes/{id}', [OrderController::class, 'show'])->name('orders.show');
+
 
     /*
     |--------------------------------------------------------------------------
@@ -89,6 +114,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/mes-licences', [LicenseController::class, 'myLicenses'])->name('licenses.index');
     Route::post('/licences/demande', [LicenseController::class, 'store'])->name('licenses.store');
 
+
     /*
     |--------------------------------------------------------------------------
     | 🥤 BUVETTE
@@ -97,6 +123,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/buvette', [BuvetteController::class, 'index'])->name('buvette');
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -111,35 +138,67 @@ Route::middleware(['auth'])
 
         /*
         |--------------------------------------------------------------------------
-        | 📦 PRODUITS
+        | 🛍️ PRODUITS
         |--------------------------------------------------------------------------
         */
+
         Route::resource('produits', ProductController::class)->except(['show']);
 
         /*
         |--------------------------------------------------------------------------
-        | 📦 COMMANDES ADMIN
+        | 📦 COMMANDES (ADMIN)
         |--------------------------------------------------------------------------
         */
-        Route::get('/commandes', [OrderController::class, 'adminOrders'])->name('orders');
 
-        Route::post('/commandes/{id}/status', [OrderController::class, 'updateStatus'])
-            ->name('orders.status');
+        Route::prefix('commandes')->group(function () {
 
-        // ✅ EXPORT CSV (FIX)
-        Route::get('/commandes/export', [OrderController::class, 'export'])
-            ->name('orders.export');
+            Route::get('/', [OrderController::class, 'adminOrders'])->name('orders');
+
+            // 🔥 LA ROUTE QUI MANQUAIT (VERY IMPORTANT)
+            Route::get('/{id}', [OrderController::class, 'show'])
+                ->name('orders.show');
+
+            Route::post('/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+
+            Route::get('/export', [OrderController::class, 'export'])->name('orders.export');
+
+        });
 
         /*
         |--------------------------------------------------------------------------
-        | 🥤 BUVETTE ADMIN
+        | 📰 ACTUALITÉS (ADMIN)
         |--------------------------------------------------------------------------
         */
-        Route::get('/buvette', [BuvetteController::class, 'adminIndex'])->name('buvette');
-        Route::get('/buvette/create', [BuvetteController::class, 'create'])->name('buvette.create');
-        Route::post('/buvette', [BuvetteController::class, 'store'])->name('buvette.store');
-        Route::delete('/buvette/{id}', [BuvetteController::class, 'destroy'])->name('buvette.delete');
+
+        Route::prefix('news')->group(function () {
+
+            Route::get('/', [NewsController::class, 'adminIndex'])->name('news.index');
+            Route::get('/create', [NewsController::class, 'create'])->name('news.create');
+            Route::post('/', [NewsController::class, 'store'])->name('news.store');
+
+            Route::get('/{id}/edit', [NewsController::class, 'edit'])->name('news.edit');
+            Route::put('/{id}', [NewsController::class, 'update'])->name('news.update');
+            Route::delete('/{id}', [NewsController::class, 'destroy'])->name('news.delete');
+
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | 🥤 BUVETTE
+        |--------------------------------------------------------------------------
+        */
+
+        Route::prefix('buvette')->group(function () {
+
+            Route::get('/', [BuvetteController::class, 'adminIndex'])->name('buvette');
+            Route::get('/create', [BuvetteController::class, 'create'])->name('buvette.create');
+            Route::post('/', [BuvetteController::class, 'store'])->name('buvette.store');
+            Route::delete('/{id}', [BuvetteController::class, 'destroy'])->name('buvette.delete');
+
+        });
+
     });
+
 
 /*
 |--------------------------------------------------------------------------

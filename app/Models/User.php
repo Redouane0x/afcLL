@@ -78,4 +78,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(Mention::class);
     }
+
+    public function newsComments()
+    {
+        return $this->hasMany(\App\Models\NewsComment::class);
+    }
+    public function newsLikes()
+    {
+        return $this->hasMany(\App\Models\NewsLike::class);
+    }
 }

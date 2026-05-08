@@ -8,33 +8,20 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | 🛒 AJOUT AU PANIER
-    |--------------------------------------------------------------------------
-    */
-
     public function add(Request $request)
     {
         $product = Product::findOrFail($request->product_id);
-
         $quantity = max(1, (int)$request->quantity);
 
-        // 🚫 STOCK
+        if ($product->sizes && !$request->size) {
+            return back()->with('error', 'Veuillez sélectionner une taille');
+        }
+
         if ($quantity > $product->stock_quantity) {
-            return back()->with('error', 'Stock insuffisant (max: ' . $product->stock_quantity . ')');
+            return back()->with('error', 'Stock insuffisant');
         }
 
         $cart = session()->get('cart', []);
-
-        // 🔥 cumul dans panier
-        $existingQuantity = collect($cart)
-            ->where('product_id', $product->id)
-            ->sum('quantity');
-
-        if (($existingQuantity + $quantity) > $product->stock_quantity) {
-            return back()->with('error', 'Stock insuffisant total');
-        }
 
         $cart[] = [
             'product_id' => $product->id,
@@ -48,65 +35,41 @@ class OrderController extends Controller
 
         session()->put('cart', $cart);
 
-        return redirect()->route('cart')->with('success', 'Produit ajouté au panier');
+        return redirect()->route('cart');
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | 🛒 PANIER
-    |--------------------------------------------------------------------------
-    */
 
     public function cart()
     {
-        $cart = session()->get('cart', []);
-        return view('pages.shop.cart', compact('cart'));
+        return view('pages.shop.cart', [
+            'cart' => session()->get('cart', [])
+        ]);
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | 💳 CHECKOUT
-    |--------------------------------------------------------------------------
-    */
 
     public function checkout()
     {
         $cart = session()->get('cart', []);
-
-        if (empty($cart)) {
-            return redirect()->route('cart');
-        }
+        if (empty($cart)) return redirect()->route('cart');
 
         return view('pages.shop.checkout', compact('cart'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 💰 PAIEMENT
-    |--------------------------------------------------------------------------
-    */
-
-    public function processPayment(Request $request)
+    public function processPayment()
     {
         $cart = session()->get('cart', []);
+        if (empty($cart)) return redirect()->route('cart');
 
-        if (empty($cart)) {
-            return redirect()->route('cart');
-        }
-
-        $total = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+        $total = collect($cart)->sum(fn($i) => $i['price'] * $i['quantity']);
 
         $order = Order::create([
             'user_id' => auth()->id(),
             'total_price' => $total,
-            'status' => 'en_preparation', // 🔥 corrigé (important)
+            'status' => 'en_preparation',
         ]);
 
         foreach ($cart as $item) {
 
             $product = Product::find($item['product_id']);
 
-            // 🔻 DÉCRÉMENT STOCK
             if ($product) {
                 $product->decrement('stock_quantity', $item['quantity']);
             }
@@ -120,18 +83,12 @@ class OrderController extends Controller
 
         session()->forget('cart');
 
-        return redirect()->route('orders.index')->with('success', 'Commande validée');
+        return redirect()->route('orders.index');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 📦 MES COMMANDES (USER)
-    |--------------------------------------------------------------------------
-    */
-
-    public function myOrders(Request $request)
+    public function myOrders()
     {
-        $orders = Order::where('user_id', $request->user()->id)
+        $orders = Order::where('user_id', auth()->id())
             ->with('products')
             ->latest()
             ->get();
@@ -139,112 +96,68 @@ class OrderController extends Controller
         return view('pages.shop.orders', compact('orders'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 🛠️ ADMIN COMMANDES
-    |--------------------------------------------------------------------------
-    */
-
-    public function adminOrders(Request $request)
+    public function adminOrders()
     {
-        $query = Order::with('products', 'user');
-
-        // 🔥 filtre status
-        if ($request->status) {
-            $query->where('status', $request->status);
-        }
-
-        // 🔥 recherche user
-        if ($request->search) {
-            $query->whereHas('user', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%');
-            });
-        }
-
-        $orders = $query->latest()->get();
+        $orders = Order::with('products', 'user')->latest()->get();
 
         return view('pages.admin.orders.index', compact('orders'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 🔄 UPDATE STATUS (ADMIN)
-    |--------------------------------------------------------------------------
-    */
-
     public function updateStatus(Request $request, $id)
     {
-        $order = Order::findOrFail($id);
-
-        $order->update([
+        Order::findOrFail($id)->update([
             'status' => $request->status
         ]);
-
-        return back()->with('success', 'Statut mis à jour');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | ❌ REMOVE PANIER
-    |--------------------------------------------------------------------------
-    */
-
-    public function remove($index)
-    {
-        $cart = session()->get('cart', []);
-
-        if (isset($cart[$index])) {
-            unset($cart[$index]);
-            session()->put('cart', array_values($cart));
-        }
 
         return back();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 📄 DETAIL COMMANDE
-    |--------------------------------------------------------------------------
-    */
+    public function remove($index)
+    {
+        $cart = session()->get('cart', []);
+        unset($cart[$index]);
+        session()->put('cart', array_values($cart));
 
+        return back();
+    }
+
+    // 🔥 FIX PRINCIPAL
     public function show($id)
     {
-        $order = Order::with('products')
-            ->where('user_id', auth()->id())
-            ->findOrFail($id);
+        $query = Order::with('products', 'user');
+
+        if (auth()->user()->role !== 'admin') {
+            $query->where('user_id', auth()->id());
+        }
+
+        $order = $query->findOrFail($id);
 
         return view('pages.shop.order-show', compact('order'));
     }
+
     public function export()
     {
-        $orders = Order::with('user', 'products')->get();
+        $orders = Order::with('user')->get();
 
-        $filename = "commandes.csv";
-
-        $headers = [
-            "Content-type" => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-        ];
-
-        $callback = function () use ($orders) {
+        return response()->stream(function () use ($orders) {
             $file = fopen('php://output', 'w');
 
-            // entête CSV
-            fputcsv($file, ['ID', 'Utilisateur', 'Total', 'Statut', 'Date']);
+            fputcsv($file, ['ID', 'User', 'Total', 'Status']);
 
-            foreach ($orders as $order) {
+            foreach ($orders as $o) {
                 fputcsv($file, [
-                    $order->id,
-                    $order->user?->name,
-                    $order->total_price,
-                    $order->status,
-                    $order->created_at,
+                    $o->id,
+                    $o->user?->name,
+                    $o->total_price,
+                    $o->status
                 ]);
             }
 
             fclose($file);
-        };
 
-        return response()->stream($callback, 200, $headers);
+        }, 200, [
+            "Content-Type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=orders.csv"
+        ]);
     }
 }
