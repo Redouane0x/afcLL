@@ -10,7 +10,6 @@ use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\BuvetteController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\NewsController;
-use App\Http\Controllers\UserController; // 👈 AJOUT ICI
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +18,9 @@ use App\Http\Controllers\UserController; // 👈 AJOUT ICI
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+Route::get('/equipes', [TeamController::class, 'index'])->name('teams.index');
+Route::get('/equipes/{slug}', [TeamController::class, 'show'])->name('teams.show');
 
 Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda');
 
@@ -163,11 +165,7 @@ Route::middleware(['auth', App\Http\Middleware\CheckAdmin::class])
         Route::prefix('commandes')->group(function () {
 
             Route::get('/', [OrderController::class, 'adminOrders'])->name('orders');
-
-            // 🔥 LA ROUTE QUI MANQUAIT (VERY IMPORTANT)
-            Route::get('/{id}', [OrderController::class, 'show'])
-                ->name('orders.show');
-
+            Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
             Route::post('/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
 
             Route::get('/export', [OrderController::class, 'export'])->name('orders.export');
