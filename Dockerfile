@@ -43,7 +43,8 @@ WORKDIR /var/www/html
 COPY . .
 
 # Ajustement des permissions pour Laravel
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/cache
+RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Exposition du port 8080 (standard pour Fly.io)
 EXPOSE 8080
