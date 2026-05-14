@@ -42,14 +42,17 @@ WORKDIR /var/www/html
 # Copie des fichiers du projet
 COPY . .
 
-# Ajustement des permissions pour Laravel
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/cache
-
+# On s'assure que les dossiers existent avant de changer les permissions
+RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 # Exposition du port 8080 (standard pour Fly.io)
 EXPOSE 8080
 
 # Configuration d'Apache pour écouter sur le port 8080
 RUN sed -i 's/80/8080/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
+
+# On dit à Apache de pointer vers le dossier public de Laravel
+RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
 # Lancement d'Apache en premier plan
 CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]

@@ -22,8 +22,9 @@ guest_path = "/var/www/html/public"
 url_prefix = "/"
 
 [deploy]
-release_command = "php artisan migrate --force"
+#release_command = "php artisan migrate --force"
 
 [env]
 APP_ENV = "production"
 LOG_CHANNEL = "stderr"
+APP_DEBUG = "true"
