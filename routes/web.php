@@ -10,6 +10,7 @@ use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\BuvetteController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\UserController; // 👈 AJOUT ICI
 
 /*
 |--------------------------------------------------------------------------
@@ -131,10 +132,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])
+Route::middleware(['auth', App\Http\Middleware\CheckAdmin::class])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | 👥 UTILISATEURS (AJOUT)
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get('/utilisateurs', [UserController::class, 'index'])->name('users.index');
+        Route::put('/utilisateurs/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 
         /*
         |--------------------------------------------------------------------------

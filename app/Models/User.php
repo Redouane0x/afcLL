@@ -24,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role', // 👈 AJOUT IMPORTANT pour pouvoir modifier le rôle
     ];
 
     /*
@@ -47,6 +48,42 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | 🛡️ ROLES & PERMISSIONS
+    |--------------------------------------------------------------------------
+    */
+
+    // Les rôles disponibles dans l'application
+    public const ROLES = [
+        'dev',
+        'super_admin',
+        'admin',
+        'joueur_licencie',
+        'joueur',
+        'user'
+    ];
+
+    // Savoir quels rôles cet utilisateur a le droit de donner
+    public function assignableRoles(): array
+    {
+        if ($this->role === 'dev') {
+            return self::ROLES; // Le dev peut tout donner
+        }
+
+        if ($this->role === 'super_admin') {
+            // Le super admin peut tout donner SAUF dev
+            return array_values(array_diff(self::ROLES, ['dev']));
+        }
+
+        if ($this->role === 'admin') {
+            // L'admin ne peut pas donner dev ni super_admin
+            return array_values(array_diff(self::ROLES, ['dev', 'super_admin']));
+        }
+
+        return []; // Les autres ne peuvent donner aucun rôle
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -83,6 +120,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(\App\Models\NewsComment::class);
     }
+
     public function newsLikes()
     {
         return $this->hasMany(\App\Models\NewsLike::class);
