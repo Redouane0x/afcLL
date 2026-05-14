@@ -1,4 +1,4 @@
-app = "ton-nom-d-app" # Remplace par le nom de ton app sur Fly
+app = "afcll"
 primary_region = "cdg" # "cdg" pour Paris (Charles de Gaulle)
 
 [build]
