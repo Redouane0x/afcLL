@@ -22,7 +22,7 @@
         <div class="hero-overlay"></div>
 
         <div class="hero-content">
-            <h1 class="hero-title">AFC Liébaüt</h1>
+            <h1 class="hero-title">AFC Liébaut</h1>
 
             <p class="hero-subtitle">
                 Passion • Respect • Discipline
