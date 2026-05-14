@@ -42,9 +42,10 @@ WORKDIR /var/www/html
 # Copie des fichiers du projet
 COPY . .
 
-# On s'assure que les dossiers existent avant de changer les permissions
+# Ajustement des permissions pour Laravel
 RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
     && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
 # Exposition du port 8080 (standard pour Fly.io)
 EXPOSE 8080
 
