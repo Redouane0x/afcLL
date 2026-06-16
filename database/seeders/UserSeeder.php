@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
 
         // 👑 SUPER ADMIN
         User::updateOrCreate(
-            ['email' => 'superadmin@afcll.com'],
+                ['email' => 'superadmin@afcll.com'],
             [
                 'name' => 'Président AFC',
                 'password' => Hash::make('GrosSecret'),
