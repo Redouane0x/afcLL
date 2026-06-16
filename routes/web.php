@@ -102,8 +102,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/mes-licences', [LicenseController::class, 'myLicenses'])->name('licenses.index');
-    Route::post('/licences/demande', [LicenseController::class, 'store'])->name('licenses.store');
+    Route::get('/mes-licences', [LicenseController::class, 'index'])->name('licenses.index');
+    Route::get('/demande-licence', [LicenseController::class, 'create'])->name('licenses.create');
+    Route::post('/demande-licence', [LicenseController::class, 'store'])->name('licenses.store');
 
     Route::get('/buvette', [BuvetteController::class, 'index'])->name('buvette');
 });
