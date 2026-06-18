@@ -101,4 +101,20 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', 'Les statistiques de ' . $user->name . ' ont été mises à jour.');
     }
+    /**
+     * Permet au joueur de choisir son numéro de maillot
+     */
+    public function updateNumber(Request $request)
+    {
+        $request->validate([
+            'number' => 'required|integer|min:1|max:99',
+        ]);
+
+        $user = auth()->user();
+        $user->update([
+            'number' => $request->number
+        ]);
+
+        return back()->with('success', 'Ton numéro de maillot a été mis à jour avec succès !');
+    }
 }

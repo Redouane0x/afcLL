@@ -57,7 +57,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // 🔀 Aiguilleur principal du Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
+    Route::put('/mon-vestiaire/numero', [App\Http\Controllers\UserController::class, 'updateNumber'])->name('player.updateNumber');
     /*
     | 📸 GALERIE
     */

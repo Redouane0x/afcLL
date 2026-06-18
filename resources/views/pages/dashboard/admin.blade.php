@@ -40,12 +40,13 @@
             </div>
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">⚡ Actions Rapides</h3>
+                <h3 class="text-lg font-bold text-gray-800 mb-4"> Actions Rapides</h3>
                 <div class="flex flex-wrap gap-4">
                     <a href="{{ route('admin.users.index') }}" class="px-4 py-2 bg-green-600 text-white text-sm rounded-md font-medium hover:bg-green-700 transition shadow-sm">Gérer les utilisateurs</a>
                     <a href="{{ route('admin.orders') }}" class="px-4 py-2 bg-green-600 text-white text-sm rounded-md font-medium hover:bg-green-700 transition shadow-sm">Voir les commandes</a>
                     <a href="{{ route('admin.produits.create') }}" class="px-4 py-2 bg-green-600 text-white text-sm rounded-md font-medium hover:bg-green-700 transition shadow-sm">Ajouter un produit</a>
                     <a href="{{ route('admin.teams.index') }}" class="px-4 py-2 bg-green-600 text-white text-sm rounded-md font-medium hover:bg-green-700 transition shadow-sm">Gérer les équipes</a>
+                    <a href="{{ route('admin.news.index') }}" class="px-4 py-2 bg-green-600 text-white text-sm rounded-md font-medium hover:bg-green-700 transition shadow-sm">Gérer les actualités</a>
                 </div>
             </div>
 
