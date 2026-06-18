@@ -5,36 +5,39 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LicenseController;
+use App\Http\Controllers\AdminLicenseController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\BuvetteController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\NewsController;
-use App\Http\Controllers\TeamController;       // 👈 Ajout
-use App\Http\Controllers\UserController;       // 👈 Ajout
-use App\Http\Controllers\DashboardController;  // 👈 Ajout
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\AdminTeamController;
 
 /*
 |--------------------------------------------------------------------------
-| 🌐 ROUTES PUBLIQUES
+| 🌐 ROUTES PUBLIQUES (Visiteurs)
 |--------------------------------------------------------------------------
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Affichage public des équipes et des effectifs
 Route::get('/equipes', [TeamController::class, 'index'])->name('teams.index');
 Route::get('/equipes/{slug}', [TeamController::class, 'show'])->name('teams.show');
 
 Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda');
 
-// 🛍️ SHOP
+// 🛍️ BOUTIQUE (Public)
 Route::get('/boutique', [ProductController::class, 'index'])->name('shop.index');
 Route::get('/boutique/{id}', [ProductController::class, 'show'])->name('shop.show');
 
-// 📰 ACTUALITÉS
+// 📰 ACTUALITÉS (Public)
 Route::get('/actualites', [NewsController::class, 'index'])->name('news.index');
 
-// 📄 PAGES
+// 📄 PAGES STATIQUES
 Route::view('/club', 'pages.public.club')->name('club');
 Route::view('/contact', 'pages.public.contact')->name('contact');
 
@@ -47,15 +50,12 @@ Route::view('/contact', 'pages.public.contact')->name('contact');
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // 🔀 Notre Aiguilleur de Dashboard
+    // 🔀 Aiguilleur principal du Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     /*
-    |--------------------------------------------------------------------------
     | 📸 GALERIE
-    |--------------------------------------------------------------------------
     */
-
     Route::prefix('galerie')->group(function () {
         Route::get('/', [GalleryController::class, 'index'])->name('gallery');
         Route::get('/create', [GalleryController::class, 'create'])->name('gallery.create');
@@ -70,20 +70,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/comment/{id}', [GalleryController::class, 'deleteComment'])->name('comment.delete');
 
     /*
-    |--------------------------------------------------------------------------
-    | 📰 ACTUALITÉS (USER)
-    |--------------------------------------------------------------------------
+    | 📰 ACTUALITÉS (Espace connecté)
     */
-
     Route::post('/news/{id}/comment', [NewsController::class, 'comment'])->name('news.comment');
     Route::post('/news/{id}/like', [NewsController::class, 'like'])->name('news.like');
 
     /*
-    |--------------------------------------------------------------------------
     | 🛒 PANIER & COMMANDES
-    |--------------------------------------------------------------------------
     */
-
     Route::prefix('panier')->group(function () {
         Route::get('/', [OrderController::class, 'cart'])->name('cart');
         Route::post('/ajouter', [OrderController::class, 'add'])->name('cart.add');
@@ -97,11 +91,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/mes-commandes/{id}', [OrderController::class, 'show'])->name('orders.show');
 
     /*
-    |--------------------------------------------------------------------------
-    | 🎫 LICENCES & BUVETTE
-    |--------------------------------------------------------------------------
+    | 🎫 LICENCES & BUVETTE (Joueur)
     */
-
     Route::get('/mes-licences', [LicenseController::class, 'index'])->name('licenses.index');
     Route::get('/demande-licence', [LicenseController::class, 'create'])->name('licenses.create');
     Route::post('/demande-licence', [LicenseController::class, 'store'])->name('licenses.store');
@@ -117,17 +108,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
 */
 
 Route::middleware(['auth', App\Http\Middleware\CheckLicencie::class])->group(function () {
-
-    // C'est ici que tu pourras mettre les futures routes protégées
-    // Ex: Route::get('/tactiques', [TactiqueController::class, 'index'])->name('tactiques.index');
-    // Ex: Route::get('/convocations', [ConvocationController::class, 'index'])->name('convocations.index');
-
+    // Prochaines étapes : tactiques, convocations de matchs, etc.
 });
 
 
 /*
 |--------------------------------------------------------------------------
-| 🛠️ ADMIN
+| 🛠️ ESPACE ADMINISTRATION (Dev, Super Admin, Admin)
 |--------------------------------------------------------------------------
 */
 
@@ -136,11 +123,20 @@ Route::middleware(['auth', App\Http\Middleware\CheckAdmin::class])
     ->name('admin.')
     ->group(function () {
 
+        /*
+        | 👤 UTILISATEURS & RÔLES
+        */
         Route::get('/utilisateurs', [UserController::class, 'index'])->name('users.index');
         Route::put('/utilisateurs/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 
+        /*
+        | 📦 BOUTIQUE (CRUD Produits)
+        */
         Route::resource('produits', ProductController::class)->except(['show']);
 
+        /*
+        | 📦 GESTION DES COMMANDES
+        */
         Route::prefix('commandes')->group(function () {
             Route::get('/', [OrderController::class, 'adminOrders'])->name('orders');
             Route::get('/{id}', [OrderController::class, 'show'])->name('orders.show');
@@ -148,6 +144,9 @@ Route::middleware(['auth', App\Http\Middleware\CheckAdmin::class])
             Route::get('/export', [OrderController::class, 'export'])->name('orders.export');
         });
 
+        /*
+        | 📰 GESTION DES ACTUALITÉS
+        */
         Route::prefix('news')->group(function () {
             Route::get('/', [NewsController::class, 'adminIndex'])->name('news.index');
             Route::get('/create', [NewsController::class, 'create'])->name('news.create');
@@ -157,6 +156,9 @@ Route::middleware(['auth', App\Http\Middleware\CheckAdmin::class])
             Route::delete('/{id}', [NewsController::class, 'destroy'])->name('news.delete');
         });
 
+        /*
+        | 🍹 GESTION DE LA BUVETTE
+        */
         Route::prefix('buvette')->group(function () {
             Route::get('/', [BuvetteController::class, 'adminIndex'])->name('buvette');
             Route::get('/create', [BuvetteController::class, 'create'])->name('buvette.create');
@@ -164,12 +166,32 @@ Route::middleware(['auth', App\Http\Middleware\CheckAdmin::class])
             Route::delete('/{id}', [BuvetteController::class, 'destroy'])->name('buvette.delete');
         });
 
+        /*
+        | 🎫 GESTION DES LICENCES
+        */
+        Route::prefix('licences')->group(function () {
+            Route::get('/', [AdminLicenseController::class, 'index'])->name('licenses.index');
+            Route::post('/{id}/status', [AdminLicenseController::class, 'updateStatus'])->name('licenses.status');
+        });
+
+        /*
+        | ⚽ GESTION DES ÉQUIPES (Nouveau module intégré)
+        | URL complète : /admin/equipes
+        */
+        Route::prefix('equipes')->name('teams.')->group(function () {
+            Route::get('/', [AdminTeamController::class, 'index'])->name('index');
+            Route::post('/', [AdminTeamController::class, 'store'])->name('store');
+            Route::delete('/{team}', [AdminTeamController::class, 'destroy'])->name('destroy');
+            Route::post('/{team}/assign', [AdminTeamController::class, 'assignPlayer'])->name('assign');
+            Route::delete('/{team}/remove/{user}', [AdminTeamController::class, 'removePlayer'])->name('remove');
+        });
+
     });
 
 
 /*
 |--------------------------------------------------------------------------
-| 🔐 AUTH
+| 🔐 LOGS D'AUTHENTIFICATION (Breeze / Jetstream)
 |--------------------------------------------------------------------------
 */
 

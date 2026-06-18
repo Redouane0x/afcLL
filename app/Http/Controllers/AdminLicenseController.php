@@ -25,7 +25,8 @@ class AdminLicenseController extends Controller
         // On pagine pour éviter de surcharger la page si le club a beaucoup de licenciés
         $licenses = $query->paginate(15);
 
-        return view('admin.licenses.index', compact('licenses'));
+        // 👈 LA CORRECTION EST ICI : on pointe vers pages/admin/licenses/index.blade.php
+        return view('pages.admin.licenses.index', compact('licenses'));
     }
 
     /**

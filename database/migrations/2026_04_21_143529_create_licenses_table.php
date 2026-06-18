@@ -13,11 +13,19 @@ return new class extends Migration
     {
         Schema::create('licenses', function (Blueprint $table) {
             $table->id();
-            // Clé étrangère pour relier la licence à un utilisateur
+
+            // Clé étrangère vers la table users (si l'user est supprimé, sa licence l'est aussi)
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('category'); // ex: U11, U13, Senior
-            $table->decimal('price', 8, 2); // Prix de la licence
-            $table->string('status')->default('en_attente'); // en_attente, payee
+
+            // Le chemin vers le fichier uploadé (PDF, JPG, etc.)
+            $table->string('document_path');
+
+            // Le type de demande (création ou renouvellement)
+            $table->string('type_demande')->default('creation');
+
+            // Le statut de la demande (en attente, validée, refusée)
+            $table->string('status')->default('en attente');
+
             $table->timestamps();
         });
     }

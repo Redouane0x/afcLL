@@ -9,6 +9,7 @@ use App\Models\GalleryImage;
 use App\Models\Like;
 use App\Models\Comment;
 use App\Models\Mention;
+use App\Models\Team; // 👈 AJOUT ICI
 
 class User extends Authenticatable
 {
@@ -87,7 +88,7 @@ class User extends Authenticatable
 
     /*
     |--------------------------------------------------------------------------
-    | 🔗 RELATIONS GALERIE
+    | 🔗 RELATIONS GALERIE & NEWS
     |--------------------------------------------------------------------------
     */
 
@@ -124,5 +125,19 @@ class User extends Authenticatable
     public function newsLikes()
     {
         return $this->hasMany(\App\Models\NewsLike::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ⚽ RELATIONS ÉQUIPES
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Un utilisateur (joueur) peut appartenir à plusieurs équipes (ex: A et B).
+     */
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class);
     }
 }

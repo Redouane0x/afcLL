@@ -3,37 +3,30 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Team; // 👈 Très important : on importe le modèle de la base de données
 
 class TeamController extends Controller
 {
-    private $teams = [
-        ['name' => 'Séniors', 'slug' => 'seniors', 'age' => '20-35 ans'],
-        ['name' => 'Vétérans', 'slug' => 'veterans', 'age' => '+35 ans'],
-        ['name' => 'U18', 'slug' => 'u18', 'age' => '16-18 ans'],
-        ['name' => 'U14', 'slug' => 'u14', 'age' => '13-14 ans'],
-        ['name' => 'U13', 'slug' => 'u13', 'age' => '12-13 ans'],
-        ['name' => 'U12', 'slug' => 'u12', 'age' => '11-12 ans'],
-        ['name' => 'U11', 'slug' => 'u11', 'age' => '10-11 ans'],
-        ['name' => 'U10', 'slug' => 'u10', 'age' => '9-10 ans'],
-        ['name' => 'U9', 'slug' => 'u9', 'age' => '8-9 ans'],
-        ['name' => 'U8', 'slug' => 'u8', 'age' => '7-8 ans'],
-        ['name' => 'U7', 'slug' => 'u7', 'age' => '6-7 ans'],
-        ['name' => 'U6', 'slug' => 'u6', 'age' => '5-6 ans'],
-        ['name' => 'Baby', 'slug' => 'baby', 'age' => '3-5 ans'],
-    ];
-
+    /**
+     * Affiche la liste publique de toutes les équipes
+     */
     public function index()
     {
+        // On récupère toutes les équipes depuis la base de données
+        $teams = Team::all();
+
         return view('pages.teams.index', [
-            'teams' => $this->teams
+            'teams' => $teams
         ]);
     }
-
+    /**
+     * Affiche la page publique détaillée d'une équipe
+     */
     public function show($slug)
     {
-        $team = collect($this->teams)->firstWhere('slug', $slug);
-
-        if (!$team) abort(404);
+        // On cherche l'équipe dans la base de données via son slug,
+        // et on inclut les joueurs (users) qui ont été assignés par l'admin !
+        $team = Team::with('users')->where('slug', $slug)->firstOrFail();
 
         return view('pages.teams.show', [
             'team' => $team

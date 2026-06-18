@@ -26,8 +26,8 @@ class UserController extends Controller
         // On trie par les plus récents et on pagine (15 par page)
         $users = $query->latest()->paginate(15);
 
-        // Assure-toi d'avoir créé cette vue dans resources/views/admin/users/index.blade.php
-        return view('admin.users.index', compact('users'));
+        // 👈 CORRECTION ICI : On pointe vers le dossier pages
+        return view('pages.admin.users.index', compact('users'));
     }
 
     /**

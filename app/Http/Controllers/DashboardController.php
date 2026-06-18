@@ -21,9 +21,11 @@ class DashboardController extends Controller
                 'total_users' => User::count(),
                 'joueurs_licencies' => User::where('role', 'joueur_licencie')->count(),
                 'commandes_attente' => Order::where('status', 'en_attente')->count(),
-                'licences_attente' => License::where('status', 'en_attente')->count(),
+                // Attention ici : j'ai corrigé 'en_attente' par 'en attente' (avec espace) pour matcher notre BDD
+                'licences_attente' => License::where('status', 'en attente')->count(),
             ];
 
+            // On affiche la vue du dashboard admin !
             return view('pages.dashboard.admin', compact('stats'));
         }
 

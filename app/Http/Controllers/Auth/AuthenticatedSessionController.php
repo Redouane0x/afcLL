@@ -32,7 +32,7 @@ class AuthenticatedSessionController extends Controller
 
         // 🔥 REDIRECTION FORCÉE (FIABLE)
         if ($user->role === 'admin') {
-            return redirect('/admin/produits');
+            return redirect('/dashboard');
         }
 
         if ($user->role === 'joueur') {
