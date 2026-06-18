@@ -15,6 +15,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\AdminTeamController;
+use App\Http\Controllers\PlayerController;
+use App\Http\Controllers\AdminAgendaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +29,9 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 // Affichage public des équipes et des effectifs
 Route::get('/equipes', [TeamController::class, 'index'])->name('teams.index');
 Route::get('/equipes/{slug}', [TeamController::class, 'show'])->name('teams.show');
+
+// 👇 AJOUTE CETTE LIGNE POUR LE PROFIL JOUEUR
+Route::get('/joueur/{id}', [PlayerController::class, 'show'])->name('players.show');
 
 Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda');
 
@@ -129,6 +134,8 @@ Route::middleware(['auth', App\Http\Middleware\CheckAdmin::class])
         Route::get('/utilisateurs', [UserController::class, 'index'])->name('users.index');
         Route::put('/utilisateurs/{user}/role', [UserController::class, 'updateRole'])->name('users.updateRole');
 
+        Route::get('/utilisateurs/{user}/stats', [UserController::class, 'editStats'])->name('users.editStats');
+        Route::put('/utilisateurs/{user}/stats', [UserController::class, 'updateStats'])->name('users.updateStats');
         /*
         | 📦 BOUTIQUE (CRUD Produits)
         */
@@ -185,9 +192,16 @@ Route::middleware(['auth', App\Http\Middleware\CheckAdmin::class])
             Route::post('/{team}/assign', [AdminTeamController::class, 'assignPlayer'])->name('assign');
             Route::delete('/{team}/remove/{user}', [AdminTeamController::class, 'removePlayer'])->name('remove');
         });
+        /*
+                | 📅 GESTION DE L'AGENDA (Manuel)
+                */
+        Route::prefix('agenda')->name('agenda.')->group(function () {
+            Route::get('/', [AdminAgendaController::class, 'index'])->name('index');
+            Route::post('/', [AdminAgendaController::class, 'store'])->name('store');
+            Route::delete('/{agenda}', [AdminAgendaController::class, 'destroy'])->name('destroy');
+        });
 
     });
-
 
 /*
 |--------------------------------------------------------------------------

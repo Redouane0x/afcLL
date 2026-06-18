@@ -15,18 +15,23 @@ class UserController extends Controller
     {
         $currentUser = auth()->user();
 
-        // On commence la requête
+        // On prépare la requête de base
         $query = User::query();
 
-        // 🛡️ LE BOUCLIER : Si je ne suis pas 'dev', je ne vois pas les 'devs'
-        if ($currentUser->role !== 'dev') {
+        // 🛡️ GESTION DES DROITS ET VISIBILITÉ
+        if ($currentUser->role === 'admin') {
+            // Un "admin" ne voit pas les "super_admin" ni les "dev"
+            $query->whereNotIn('role', ['super_admin', 'dev']);
+
+        } elseif ($currentUser->role === 'super_admin') {
+            // Un "super_admin" ne voit pas les "dev"
             $query->where('role', '!=', 'dev');
         }
+        // (Si c'est le "dev", il voit tout le monde, on ne filtre rien)
 
-        // On trie par les plus récents et on pagine (15 par page)
-        $users = $query->latest()->paginate(15);
+        // On exécute la requête avec la pagination (ex: 15 par page)
+        $users = $query->paginate(15);
 
-        // 👈 CORRECTION ICI : On pointe vers le dossier pages
         return view('pages.admin.users.index', compact('users'));
     }
 
@@ -60,5 +65,40 @@ class UserController extends Controller
 
         // 5. On redirige avec un message de succès
         return back()->with('success', 'Le rôle de ' . $user->name . ' a été mis à jour avec succès !');
+    }
+
+    /**
+     * Affiche le formulaire de modification des statistiques d'un joueur
+     */
+    public function editStats(User $user)
+    {
+        // Sécurité optionnelle : s'assurer que c'est bien un joueur licencié ou un joueur
+        if (!in_array($user->role, ['joueur_licencie', 'joueur'])) {
+            return redirect()->route('admin.users.index')->withErrors(['error' => 'Cet utilisateur n\'est pas un joueur.']);
+        }
+
+        return view('pages.admin.users.stats', compact('user'));
+    }
+
+    /**
+     * Enregistre les nouvelles statistiques en base de données
+     */
+    public function updateStats(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'position' => 'required|string|max:255',
+            'rating' => 'required|integer|min:1|max:99',
+            'buts' => 'required|integer|min:0',
+            'passes' => 'required|integer|min:0',
+            'matchs_gagnes' => 'required|integer|min:0',
+            'matchs_joues' => 'required|integer|min:0',
+            'reussite_passes' => 'required|integer|min:0|max:100',
+            'pied_fort' => 'required|string|max:255',
+            'taille' => 'required|string|max:255',
+        ]);
+
+        $user->update($validated);
+
+        return redirect()->route('admin.users.index')->with('success', 'Les statistiques de ' . $user->name . ' ont été mises à jour.');
     }
 }

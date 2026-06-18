@@ -17,25 +17,49 @@
             <div>
                 <h2 class="text-2xl font-bold text-gray-900 mb-6">Joueurs</h2>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {{-- On boucle sur les vrais joueurs de l'équipe --}}
-                    @forelse($team->users as $player)
-                        <div class="bg-white rounded-xl shadow-sm p-4 flex flex-col items-center border border-gray-100 hover:shadow-md transition-shadow">
-                            <div class="bg-gray-200 w-full h-40 rounded-lg mb-4 flex items-center justify-center">
-                                <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                            </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
 
-                            <span class="text-gray-900 font-medium text-lg">{{ $player->name }}</span>
-                        </div>
+                    {{-- LA SEULE ET UNIQUE BOUCLE --}}
+                    @forelse($team->users as $player)
+                        <a href="{{ route('players.show', $player->id) }}" class="player-card">
+                            <div class="player-img flex items-center justify-center text-green-700 font-bold text-4xl">
+                                {{ strtoupper(substr($player->name, 0, 1)) }}
+                            </div>
+                            <p class="font-bold text-gray-800">{{ $player->name }}</p>
+                        </a>
                     @empty
-                        {{-- S'il n'y a aucun joueur dans l'équipe pour l'instant --}}
                         <div class="col-span-full py-10 bg-white rounded-xl border border-gray-200 text-center">
-                            <p class="text-gray-500">Aucun joueur n'a encore été assigné à cette équipe pour le moment.</p>
+                            <p class="text-gray-500">Aucun joueur n'a encore été assigné à cette équipe.</p>
                         </div>
                     @endforelse
+
                 </div>
             </div>
 
         </div>
     </div>
 </x-app-layout>
+
+<style>
+    .player-card {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        transition: 0.3s;
+        display: block; /* Essentiel pour que tout le bloc soit cliquable */
+        text-decoration: none;
+    }
+
+    .player-img {
+        height: 120px;
+        background: #dcfce7; /* Vert très clair */
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .player-card:hover {
+        transform: translateY(-5px);
+    }
+</style>

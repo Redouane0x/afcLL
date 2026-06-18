@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
                 ['email' => 'superadmin@afcll.com'],
             [
-                'name' => 'Président AFC',
+                'name' => 'Président AFCLL',
                 'password' => Hash::make('GrosSecret'),
                 'role' => 'super_admin',
                 'number' => null,
@@ -36,7 +36,7 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@afcll.com'],
             [
-                'name' => 'Admin AFC',
+                'name' => 'Admin AFCLL',
                 'password' => Hash::make('GrosSecret'),
                 'role' => 'admin',
                 'number' => null,

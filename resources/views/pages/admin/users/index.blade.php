@@ -41,7 +41,7 @@
                             <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateur</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'inscription</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rôle actuel</th>
-                            <th scope="col" class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Modifier le rôle</th>
+                            <th scope="col" class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
@@ -72,7 +72,7 @@
                                             </span>
                                     @elseif($user->role === 'joueur')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
-                                                JOUEUR (Attente)
+                                                JOUEUR (En_Attente)
                                             </span>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
@@ -81,25 +81,45 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <form action="{{ route('admin.users.updateRole', $user->id) }}" method="POST" class="flex items-center justify-end gap-2">
-                                        @csrf
-                                        @method('PUT')
+                                    <div class="flex items-center justify-end gap-3">
 
-                                        <select name="role" class="block w-40 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
-                                            @if(auth()->user()->role === 'dev')
-                                                <option value="dev" {{ $user->role === 'dev' ? 'selected' : '' }}>Dev</option>
-                                            @endif
-                                            <option value="super_admin" {{ $user->role === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                                            <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
-                                            <option value="joueur_licencie" {{ $user->role === 'joueur_licencie' ? 'selected' : '' }}>Joueur Licencié</option>
-                                            <option value="joueur" {{ $user->role === 'joueur' ? 'selected' : '' }}>Joueur (Attente)</option>
-                                            <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>User (Base)</option>
-                                        </select>
+                                        {{-- 👇 LE BOUTON STATS EST AJOUTÉ ICI --}}
+                                        @if(in_array($user->role, ['joueur_licencie', 'joueur']))
+                                            <a href="{{ route('admin.users.editStats', $user->id) }}" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                                                📊 Stats
+                                            </a>
+                                        @endif
 
-                                        <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                                            Appliquer
-                                        </button>
-                                    </form>
+                                        {{-- LE FORMULAIRE EXISTANT --}}
+                                        <form action="{{ route('admin.users.updateRole', $user->id) }}" method="POST" class="flex items-center gap-2">
+                                            @csrf
+                                            @method('PUT')
+
+                                            <select name="role" class="block w-40 text-sm border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+
+                                                {{-- Seul le Dev peut attribuer le rôle Dev --}}
+                                                @if(auth()->user()->role === 'dev')
+                                                    <option value="dev" {{ $user->role === 'dev' ? 'selected' : '' }}>Dev</option>
+                                                @endif
+
+                                                {{-- Seuls le Dev et le Super Admin peuvent attribuer le rôle Super Admin --}}
+                                                @if(in_array(auth()->user()->role, ['dev', 'super_admin']))
+                                                    <option value="super_admin" {{ $user->role === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                                                @endif
+
+                                                {{-- Options visibles pour tout le monde (Admin inclus) --}}
+                                                <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                                                <option value="joueur_licencie" {{ $user->role === 'joueur_licencie' ? 'selected' : '' }}>Joueur Licencié</option>
+                                                <option value="joueur" {{ $user->role === 'joueur' ? 'selected' : '' }}>Joueur (En_Attente)</option>
+                                                <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>User </option>
+
+                                            </select>
+
+                                            <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                                                Appliquer
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach

@@ -25,7 +25,16 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // 👈 AJOUT IMPORTANT pour pouvoir modifier le rôle
+        'role',
+        'position',
+        'rating',
+        'buts',
+        'passes',
+        'matchs_gagnes',
+        'matchs_joues',
+        'reussite_passes',
+        'pied_fort',
+        'taille',
     ];
 
     /*
