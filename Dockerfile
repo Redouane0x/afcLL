@@ -2,7 +2,7 @@
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 2. Installation de PHP 8.4, dépendances ET Node.js (pour compiler le CSS)
+# 2. Installation de PHP 8.4, dépendances ET Node.js
 RUN apt-get update && apt-get install -y gnupg2 curl ca-certificates zip unzip git lsb-release \
     && curl -sSLo /usr/share/keyrings/deb.sury.org-php.gpg https://packages.sury.org/php/apt.gpg \
     && echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list \
@@ -17,7 +17,7 @@ RUN a2enmod rewrite
 # 4. Modification du port d'écoute Apache (80 -> 8080)
 RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf
 
-# 5. Configuration d'un VirtualHost pour Laravel
+# 5. Configuration d'un VirtualHost
 RUN echo "<VirtualHost *:8080>" > /etc/apache2/sites-available/000-default.conf \
     && echo "    DocumentRoot /var/www/html/public" >> /etc/apache2/sites-available/000-default.conf \
     && echo "    <Directory /var/www/html/public>" >> /etc/apache2/sites-available/000-default.conf \
@@ -33,20 +33,22 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
-# 8. Installation des dépendances PHP (L'ÉTAPE MANQUANTE)
+# 8. Création de l'arborescence requise par Laravel AVANT Composer
+RUN mkdir -p bootstrap/cache storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs database \
+    && touch database/database.sqlite
+
+# 9. Installation des dépendances PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# 9. LA MAGIE : Compilation du CSS/JS (Vite) directement sur le serveur
+# 10. Compilation du CSS/JS (Vite)
 RUN npm install \
     && npm run build
 
-# 10. Création du lien pour les images et ajustement des permissions
+# 11. Création du lien pour les images et ajustement des permissions
 RUN php artisan storage:link \
-    && mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database \
-    && touch /var/www/html/database/database.sqlite \
-    && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database /var/www/html/public/build \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database /var/www/html/public/build
+    && chown -R www-data:www-data storage bootstrap/cache database public/build \
+    && chmod -R 775 storage bootstrap/cache database public/build
 
-# 11. Exposition du port et lancement d'Apache
+# 12. Exposition du port et lancement d'Apache
 EXPOSE 8080
 CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
