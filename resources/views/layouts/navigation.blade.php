@@ -28,7 +28,7 @@
 
                 {{-- PANIER --}}
                 <a href="{{ route('cart') }}" class="nav-link flex items-center gap-1">
-                    🛒
+                    Panier
                     @php $count = count(session('cart', [])); @endphp
                     @if($count > 0)
                         <span class="badge">{{ $count }}</span>
@@ -178,6 +178,9 @@
                     <a href="{{ route('admin.produits.index') }}" class="submenu-card">Produits</a>
                     <a href="{{ route('admin.orders') }}" class="submenu-card">Commandes</a>
                     <a href="{{ route('admin.news.index') }}" class="submenu-card">Actualités</a>
+                    <a href="{{ route('admin.teams.index') }}" class="submenu-card">Equipes</a>
+                    <a href="{{ route('admin.users.index') }}" class="submenu-card">Utilisateurs</a>
+
                 </div>
             </div>
 
