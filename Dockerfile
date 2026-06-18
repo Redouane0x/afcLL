@@ -33,17 +33,20 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
-# 8. LA MAGIE : Compilation du CSS/JS (Vite) directement sur le serveur
+# 8. Installation des dépendances PHP (L'ÉTAPE MANQUANTE)
+RUN composer install --no-dev --optimize-autoloader
+
+# 9. LA MAGIE : Compilation du CSS/JS (Vite) directement sur le serveur
 RUN npm install \
     && npm run build
 
-# 9. Création du lien pour les images et ajustement des permissions
+# 10. Création du lien pour les images et ajustement des permissions
 RUN php artisan storage:link \
     && mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database \
     && touch /var/www/html/database/database.sqlite \
     && chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database /var/www/html/public/build \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database /var/www/html/public/build
 
-# 10. Exposition du port et lancement d'Apache
+# 11. Exposition du port et lancement d'Apache
 EXPOSE 8080
 CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
